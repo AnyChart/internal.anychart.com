@@ -1,0 +1,68 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Active Projects</title>
+
+    <link href="https://cdn.anychart.com/fonts/latest/css/anychart-font.min.css" type="text/css" rel="stylesheet">
+    <link href="https://cdn.anychart.com/releases/latest/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
+
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-bundle.min.js"></script>
+    <script src="/js/projects-loader.js"></script>
+</head>
+<body>
+    <h1>Hello</h1>
+    <button onclick="addProjectPopup()">Create new project</button>
+    <hr/>
+    <h1>Projects</h1>
+    <div id="current_projects">Loading...</div>
+</body>
+<script>
+        const preloader = anychart.ui.preloader();
+        preloader.render();
+        preloader.visible(true);
+
+        const projectsContainer = document.getElementById('current_projects');
+
+        anychart.onDocumentReady(() => {
+            fetch('/projects')
+                .then(resp => resp.json())
+                .then(projects => {
+                    if (projects.message)
+                        return Promise.reject(projects);
+
+                    if (projects.length) {
+                        projectsContainer.innerHTML = '';
+                        projects.forEach(project => {
+                            const text = `[${anychart.format.dateTime(project.last_modified)}] ${project.name}`;
+                            const href = `/p/${project.id}`;
+                            const a = document.createElement('a');
+                            a.setAttribute('href', href);
+                            a.innerHTML = text;
+                            projectsContainer.appendChild(a);
+                            projectsContainer.appendChild(document.createElement('br'));
+                        });
+                    } else {
+                        projectsContainer.innerHTML = 'No projects exist.';
+                    }
+                    preloader.visible(false);
+                })
+                .catch((err) => {
+                    if (err) {
+                        console.log(err);
+                        projectsContainer.innerHTML = err.message ? err.message : 'Unknown error on loading data.';
+                    } else {
+                        projectsContainer.innerHTML = 'Could not fetch projects data.'
+                    }
+                    preloader.visible(false);
+                })
+        });
+
+        function addProjectPopup() {
+            alert('qwer');
+        }
+    </script>
+</html>
+
+
+
+

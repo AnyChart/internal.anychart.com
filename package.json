@@ -1,0 +1,41 @@
+{
+  "name": "ac-gantt-project-editor",
+  "version": "0.0.1",
+  "description": "Anychart Gantt Project Editor",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "anychart",
+    "anystock",
+    "anymap",
+    "charts",
+    "plots",
+    "line charts",
+    "bar charts",
+    "pie charts",
+    "choropleth map",
+    "javascript charts",
+    "javascript plots",
+    "javascript",
+    "SVG",
+    "HTML5"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anychart-solutions/nodejs-gantt-project-editor.git"
+  },
+  "author": "Alexander Kudryavtsev<alexander.kudryavtsev@anychart.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/anychart-solutions/nodejs-gantt-project-editor/issues"
+  },
+  "homepage": "https://github.com/anychart-solutions/nodejs-gantt-project-editor",
+  "devDependencies": {},
+  "dependencies": {
+    "anychart": "^8.5.1",
+    "express": "^4.16.4",
+    "mysql": "^2.17.1"
+  }
+}
