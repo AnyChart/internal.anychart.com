@@ -24,7 +24,7 @@
 
     <!-- <script src="https://cdn.anychart.com/releases/v8/js/anychart-bundle.min.js"></script> -->
     <script src="/js/anychart-bundle.min.js"></script>
-    <script src="/js/gantt-controller.js"></script>
+    <script src="https://cdn.anychart.com/releases/latest/locales/ru-ru.js"></script>
     <script src="/js/bootstrap-datepicker.min.js"></script>
 
 
@@ -44,7 +44,8 @@
 
 <body>
     <nav class="navbar navbar-light bg-faded">
-        <a class="navbar-brand" href="#">{{ projectName }}</a>
+        <a class="navbar-brand" href="/"><img class="navbar-brand" src="/images/ac.png" width="30px" /> <span
+                class="ac ac-chevron-left"></span> {{ projectName }}</a>
     </nav>
 
     <div class="container-fluid" style="height: 100%; max-height: 600px">
@@ -53,15 +54,19 @@
                 <div class="card">
                     <div class="card-header">
                         <nav class="navbar navbar-expand-sm justify-content-end">
-                            <button class="btn btn-primary"><span class="ac ac-position-bottom"></span> Collapse
-                                All</button>&nbsp;
-                            <button class="btn btn-primary"><span class="ac ac-position-top"></span> Expand
-                                All</button>&nbsp;
-                            <button class="btn btn-primary" onclick="controller.chart.zoomIn()"><span class="ac ac-plus"></span> Zoom In</button>&nbsp;
-                            <button class="btn btn-primary" onclick="controller.chart.zoomOut()"><span class="ac ac-minus"></span> Zoom Out</button>&nbsp;
-                            <button class="btn btn-primary" onclick="controller.chart.fitAll()"><span class="ac ac-position-center"></span> Fit All</button>
+                            <button class="btn btn-primary" onclick="controller.chart.collapseAll()"><span
+                                    class="ac ac-position-top"></span> Свернуть все</button>&nbsp;
+                            <button class="btn btn-primary" onclick="controller.chart.expandAll()"><span
+                                    class="ac ac-position-bottom"></span> Развернуть все</button>&nbsp;
+                            <button class="btn btn-primary" onclick="controller.chart.zoomIn()"><span
+                                    class="ac ac-plus"></span> Ближе</button>&nbsp;
+                            <button class="btn btn-primary" onclick="controller.chart.zoomOut()"><span
+                                    class="ac ac-minus"></span> Дальше</button>&nbsp;
+                            <button class="btn btn-primary" onclick="controller.chart.fitAll()"><span
+                                    class="ac ac-position-center"></span> Показать все</button>
 
-                            <button class="btn btn-outline-success ml-auto mr-1" onclick="addTask()" id="add_task_button">Add task</button>
+                            <button class="btn btn-outline-success ml-auto mr-1" onclick="addTask()"
+                                id="add_task_button">Добавить задачу</button>
                         </nav>
 
                     </div>
@@ -72,81 +77,56 @@
                 <div class="card">
                     <div class="card-header">
                         <nav class="navbar navbar-expand-sm justify-content-end">
-                            <span class="nav-link" id="current_task_name">Task Data</span>
+                            <span class="nav-link" id="current_task_name">Добавление новой задачи</span>
                         </nav>
                     </div>
                     <div class="card-body">
                         <!-- NAME -->
-                        <input id="task_name" type="text" class="form-control" placeholder="Task Name"
+                        <input id="task_name" type="text" class="form-control" placeholder="Имя задачи"
                             aria-describedby="basic-addon2">
                         <br />
 
                         <!-- ACTUAL START -->
                         <div class="input-group mb-3" id="actual_start_dp">
-                            <input id="task_actual_start" type="text" class="form-control" placeholder="Actual Start"
+                            <input id="task_actual_start" type="text" class="form-control"
+                                placeholder="Фактический старт" aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button"><span
+                                        class="ac ac-v-line-dotted"></span></button>
+                            </div>
+                        </div>
+
+                        <!-- ACTUAL END -->
+                        <div class="input-group mb-3" id="actual_end_dp">
+                            <input id="task_actual_end" type="text" class="form-control"
+                                placeholder="Фактическое окончание" aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button"><span
+                                        class="ac ac-v-line-dotted"></span></button>
+                            </div>
+                        </div> <br>
+
+                        <!-- BASELINE START -->
+                        <div class="input-group mb-3" id="baseline_start_dp">
+                            <input id="task_baseline_start" type="text" class="form-control" placeholder="Планируемый старт"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button"><span
                                         class="ac ac-v-line-dotted"></span></button>
                             </div>
                         </div>
-                        <script>
-                            const asdp = $('#task_actual_start');
-                            asdp.datepicker({
-                                format: "dd/MM/yyyy",
-                                weekStart: 1,
-                                todayBtn: true,
-                                language: "ru",
-                                orientation: "left auto",
-                                autoclose: true,
-                                todayHighlight: true
-                            });
 
-                            const asb = $('#actual_start_dp button');
-                            asb.on('click', () => {
-                                asdp.datepicker('show');
-                            })
-
-                            asdp.datepicker()
-                                .on('changeDate', function (e) {
-
-                                });
-                        </script>
-
-                        <!-- ACTUAL END -->
-                        <div class="input-group mb-3" id="actual_end_dp">
-                            <input id="task_actual_end" type="text" class="form-control" placeholder="Actual End"
+                        <!-- BASELINE END -->
+                        <div class="input-group mb-3" id="baseline_end_dp">
+                            <input id="task_baseline_end" type="text" class="form-control" placeholder="Планируемое окончание"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button"><span
                                         class="ac ac-v-line-dotted"></span></button>
                             </div>
                         </div> <br>
-                        <script>
-                            const aedp = $('#task_actual_end');
-                            aedp.datepicker({
-                                format: "dd/MM/yyyy",
-                                weekStart: 1,
-                                todayBtn: true,
-                                language: "ru",
-                                orientation: "left auto",
-                                autoclose: true,
-                                todayHighlight: true
-                            });
 
-                            const aeb = $('#actual_end_dp button');
-                            aeb.on('click', () => {
-                                aedp.datepicker('show');
-                            })
-
-                            aedp.datepicker()
-                                .on('changeDate', function (e) {
-                                    aedp.datepicker('getUTCDate');
-                                    // `e` here contains the extra attributes
-                                });
-                        </script>
-
-
+                        <!-- PROGRESS -->
                         <div>
                             <input type="range" step="10" value="0" id="task_progress" list="tickmarks"
                                 oninput="changeProgress(this.value)" onchange="changeProgress(this.value)">
@@ -164,11 +144,11 @@
                                 <option value="90">
                                 <option value="100" label="100%">
                             </datalist>
-                            <label for="task_progress" id="progress_label">Progress: 0%</label>
+                            <label for="task_progress" id="progress_label">Прогресс: 0%</label>
                         </div>
 
-                        <button class="btn btn-outline-success ml-auto mr-1" onclick="commitTask()">OK</button>
-                        <button class="btn btn-outline-secondary ml-auto mr-1" onclick="closeTask()">Close</button>
+                        <button class="btn btn-outline-success ml-auto mr-1" onclick="commitTask()">Применить</button>
+                        <button class="btn btn-outline-secondary ml-auto mr-1" onclick="closeTask()">Закрыть</button>
 
                     </div>
                 </div>
@@ -179,117 +159,78 @@
 
     <script>
         const projectId = {{ projectId }};
-
-        const preloader = anychart.ui.preloader();
-        preloader.render();
-        preloader.visible(true);
-
-        const controller = new GanttController();
-        controller.addEventListener('itemSelect', (e) => {
-            $('#add_task_button').html(`Add subtask to "${e.item.get('name')}"`);
-            $('#task_panel').css('display', 'block');
-            // $('#current_task_name').html(controller.selectedItem.get('name'));
-            $('#task_name').val(e.item.get('name'));
-            const now = Date.now();
-            $('#task_actual_start').datepicker('setUTCDate', new Date(e.item.get('actualStart')));
-            $('#task_actual_end').datepicker('setUTCDate',new Date(e.item.get('actualEnd')));
-            console.log(e.item.get('progressValue'));
-            $('#task_progress').val(50);
-
-            $('#task_name').focus();
-        });
-
-        controller.addEventListener('itemDeselect', (e) => {
-            $('#add_task_button').html('Add task');
-            resetTask();
-            $('#task_panel').css('display', 'none');
-        });
-
-        const projectsContainer = $('#current_projects');
-
-        anychart.onDocumentReady(() => {
-            fetch(`/tasks/${projectId}`)
-                .then(resp => resp.json())
-                .then(tasks => controller.init(tasks))
-                .then(() => {
-                    $('#task_panel').css('display', 'none');
-                    preloader.visible(false);
-                })
-                .catch(err => {
-                    preloader.visible(false);
-                });
-        });
-
-        function addTask() {
-            $('#task_panel').css('display', 'block');
-            if (controller.selectedItem) {
-                resetTask();
-            }
-            $('#task_name').focus();
-        }
-
-        function commitTask() {
-            const name = $('#task_name').val();
-            const now = new Date();
-            const as = $('#task_actual_start').datepicker('getDate');
-            const ae = $('#task_actual_end').datepicker('getDate');
-
-            let asUtc = null;
-            if (as)
-                asUtc = as.getTime() - as.getTimezoneOffset() * 60000;
-
-            let aeUtc = null;
-            if (ae)
-                aeUtc = ae.getTime() - ae.getTimezoneOffset() * 60000 + (24 * 60 * 60 * 1000 - 1);
-
-            const progress = $('#task_progress').val();
-            const parent = controller.selectedItem ? controller.selectedItem.get('id') : null;
-
-            const newTaskData = {
-                name: name,
-                actualStart: asUtc,
-                actualEnd: aeUtc,
-                progress: +progress / 100,
-                parent: parent,
-                project: projectId
-            };
-
-            preloader.visible(true);
-            $.post(
-                '/add-task',
-                newTaskData,
-                (tasks) => {
-                    if (tasks.message) {
-                        //TODO add exception.
-                    } else {
-                        debugger;
-                        controller.tree.addData(tasks, 'as-table');
-                        controller.chart.fitAll();
-                    }
-
-                    resetTask();
-                    preloader.visible(false);
-                }
-            );
-        }
-
-        function resetTask() {
-            $('#current_task_name').html('Task Data');
-            $('#task_name').val('');
-            $('#task_actual_start').val('');
-            $('#task_actual_end').val('');
-            $('#task_progress').val('0');
-        }
-
-        function closeTask() {
-            resetTask();
-            $('#task_panel').css('display', 'none');
-        }
-
-        function changeProgress(val) {
-            $('#progress_label').html(`Progress: ${val}%`);
-        }
+        let addState = 'new'; // Allowed states are 'new', 'edit'.
+        anychart.format.outputLocale('ru-ru');
     </script>
+    <script>
+        const datePickerConfig = {
+            format: 'dd MM yyyy',
+            weekStart: 1,
+            todayBtn: true,
+            language: "ru",
+            orientation: "left auto",
+            autoclose: true,
+            todayHighlight: true
+        };
+
+        const actualStartDatePicker = $('#task_actual_start');
+        actualStartDatePicker.datepicker(datePickerConfig);
+
+        const actualStartButton = $('#actual_start_dp button');
+        actualStartButton.on('click', () => {
+            actualStartDatePicker.datepicker('show');
+        })
+
+        actualStartDatePicker
+            .datepicker()
+            .on('changeDate', function (e) {
+
+            });
+
+        const actualEndDatePicker = $('#task_actual_end');
+        actualEndDatePicker.datepicker(datePickerConfig);
+
+        const actualEndButton = $('#actual_end_dp button');
+        actualEndButton.on('click', () => {
+            actualEndDatePicker.datepicker('show');
+        })
+
+        actualEndDatePicker
+            .datepicker()
+            .on('changeDate', function (e) {
+                // actualEndDatePicker.datepicker('getUTCDate');
+            });
+
+        const baselineStartDatePicker = $('#task_baseline_start');
+        baselineStartDatePicker.datepicker(datePickerConfig);
+
+        const baselineStartButton = $('#baseline_start_dp button');
+        baselineStartButton.on('click', () => {
+            baselineStartDatePicker.datepicker('show');
+        })
+
+        baselineStartDatePicker
+            .datepicker()
+            .on('changeDate', function (e) {
+
+            });
+
+        const baselineEndDatePicker = $('#task_baseline_end');
+        baselineEndDatePicker.datepicker(datePickerConfig);
+
+        const baselineEndButton = $('#baseline_end_dp button');
+        baselineEndButton.on('click', () => {
+            baselineEndDatePicker.datepicker('show');
+        })
+
+        baselineEndDatePicker
+            .datepicker()
+            .on('changeDate', function (e) {
+
+            });    
+    </script>
+    <script src="/js/gantt-controller.js"></script>
+    <script src="/js/project.js"></script>
 </body>
 
 </html>

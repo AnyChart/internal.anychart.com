@@ -8,16 +8,16 @@ class Queries { }
  * @param {string} query - Query string.
  * @returns {Promise}
  */
-Queries.makeQuery = function (query) {
+Queries.query = (query) => {
     return connect()
-        .then(pool => new Promise((resolve, reject) => {
-            pool.query(query, (err, result, fields) => {
+        .then(pc => new Promise((resolve, reject) => {
+            // console.log(query); //TODO debuging queries.
+            pc.pool.query(query, (err, result, fields) => {
+                pc.connection.release();
                 err ? reject(err) : resolve(result);
             });
         }))
-        .catch(err => {
-            return Promise.reject(err);
-        });
+        .catch(err => Promise.reject(err));
 }
 
 // ------- Project queries.
@@ -27,16 +27,16 @@ Queries.makeQuery = function (query) {
  * @private
  * @returns {Promise}
  */
-Queries.getLastModifiedProject_ = function (date) {
-    return Queries.makeQuery(`SELECT * FROM project WHERE last_modified=${date} LIMIT 1`);
+Queries.getLastModifiedProject_ = (date) => {
+    return Queries.query(`SELECT * FROM project WHERE last_modified=${date} LIMIT 1`);
 }
 
 /**
  * Gets all project.
  * @returns {Promise}
  */
-Queries.getProjects = function () {
-    return Queries.makeQuery('SELECT * FROM project ORDER BY last_modified DESC');
+Queries.getProjects = () => {
+    return Queries.query('SELECT * FROM project ORDER BY last_modified DESC');
 }
 
 /**
@@ -44,8 +44,8 @@ Queries.getProjects = function () {
  * @param {number} id - Project id.
  * @returns {Promise}
  */
-Queries.getProjectById = function (id) {
-    return Queries.makeQuery(`SELECT * FROM project WHERE id=${id}`);
+Queries.getProjectById = (id) => {
+    return Queries.query(`SELECT * FROM project WHERE id=${id}`);
 }
 
 /**
@@ -53,22 +53,40 @@ Queries.getProjectById = function (id) {
  * @param {string} name - Project name.
  * @returns {Promise}
  */
-Queries.createProject = function (name) {
+Queries.createProject = (name) => {
     const now = Date.now();
-    return Queries.makeQuery(`INSERT INTO project (id, name, last_modified) VALUES (NULL, "${name}", ${now})`)
+    return Queries.query(`INSERT INTO project (id, name, last_modified) VALUES (NULL, "${name}", ${now})`)
         .then(() => Queries.getLastModifiedProject_(now))
-        .catch(err => Promise.reject(err))
-        .then(lastModified =>Queries.getProjectById(lastModified[0].id));
+        .then(lastModified =>Queries.getProjectById(lastModified[0].id))
+        .catch(err => Promise.reject(err));
 }
 
 // ------- Tasks queries.
+/**
+ * Deletes fields if are not set.
+ * @param {Array.<Object>} - Incoming tasks.
+ * @private
+ * @returns {Promise}
+ */
+Queries.filterNulls_ = (tasks) => {
+    tasks.forEach(task => {
+        for (let key in task) {
+            if (task[key] == null)
+                delete task[key];
+        }            
+    });
+    return Promise.resolve(tasks);
+}
+
 /**
  * Gets tasks by project id.
  * @param {number} projectId - Project id.
  * @returns {Promise}
  */
-Queries.getTasksByProjectId = function(projectId) {
-    return Queries.makeQuery(`SELECT id, name, actualStart, actualEnd, progressValue, parent FROM task WHERE project=${projectId}`);
+Queries.getTasksByProjectId = (projectId) => {
+    return Queries
+        .query(`SELECT * FROM task WHERE project=${projectId}`)
+        .then(tasks => Queries.filterNulls_(tasks));
 }
 
 /**
@@ -77,8 +95,10 @@ Queries.getTasksByProjectId = function(projectId) {
  * @private
  * @returns {Promise}
  */
-Queries.getLastModifiedTask_ = function (date) {
-    return Queries.makeQuery(`SELECT id, name, actualStart, actualEnd, progressValue, parent FROM task WHERE created_date=${date} LIMIT 1`);
+Queries.getLastModifiedTask_ = (date) => {
+    return Queries
+        .query(`SELECT * FROM task WHERE created_date=${date} LIMIT 1`)
+        .then(tasks => Queries.filterNulls_(tasks));
 }
 
 /**
@@ -87,18 +107,41 @@ Queries.getLastModifiedTask_ = function (date) {
  * @param {number} id - Project id.
  * @returns {Promise}
  */
-Queries.getTaskById = function (id) {
-    return Queries.makeQuery(`SELECT id, name, actualStart, actualEnd, progressValue, parent FROM task WHERE id=${id}`);
+Queries.getTasksById = (id) => {
+    return Queries
+        .query(`SELECT * FROM task WHERE id=${id}`)
+        .then(tasks => Queries.filterNulls_(tasks));
+}
+
+Queries.resetParent_ = (id) => {
+    return Queries.query(`UPDATE task SET actualStart=NULL, actualEnd=NULL, progressValue=NULL WHERE id=${id}`);
+}
+
+Queries.resetParents_ = (parents = '[]') => {
+    return Promise.all(JSON.parse(parents).map(id => Queries.resetParent_(id)));
 }
 
 
-Queries.createTask = function (data) {
+Queries.createTask = (data) => {
     const now = Date.now();
     const NULL = 'NULL';
-    return Queries.makeQuery(`INSERT INTO task (id, name, actualStart, actualEnd, baselineStart, baselineEnd, progressValue, parent, project, created_date) VALUES (NULL, "${data.name}", ${data.actualStart}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progress}, ${data.parent || NULL}, ${data.project}, ${now})`)
+    const query = `INSERT INTO task (id, name, actualStart, actualEnd, baselineStart, baselineEnd, progressValue, parent, project, created_date) VALUES (NULL, "${data.name}", ${data.actualStart}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progress}, ${data.parent || NULL}, ${data.project}, ${now})`;
+    return Queries
+        .resetParents_(data.parentsToReset)
+        .then(() => Queries.query(query))    
         .then(() => Queries.getLastModifiedTask_(now))
-        .catch(err => Promise.reject(err))
-        .then(lastModified =>Queries.getTaskById(lastModified[0].id));
+        .then(tasks => Queries.getTasksById(tasks[0].id))
+        .catch(err => Promise.reject(err));
+}
+
+
+Queries.updateTask = (data, parents) => {
+    // const now = Date.now();
+    // const NULL = 'NULL';
+    // if (parents && parents.length) {
+    //     let query = `UPDATE task SET name="${data.name}", actualStart=""`;
+    // }
+    // return Queries.query(``);
 }
 
 module.exports = Queries;
