@@ -97,7 +97,7 @@ Queries.getTasksByProjectId = (projectId) => {
  */
 Queries.getLastModifiedTask_ = (date) => {
     return Queries
-        .query(`SELECT * FROM task WHERE created_date=${date} LIMIT 1`)
+        .query(`SELECT * FROM task WHERE last_modified=${date} LIMIT 1`)
         .then(tasks => Queries.filterNulls_(tasks));
 }
 
@@ -118,14 +118,17 @@ Queries.resetParent_ = (id) => {
 }
 
 Queries.resetParents_ = (parents = '[]') => {
-    return Promise.all(JSON.parse(parents).map(id => Queries.resetParent_(id)));
+    //TODO Resettings parents is disabled for a while because of gantt bug.
+    // return Promise.all(JSON.parse(parents).map(id => Queries.resetParent_(id)));
+
+    return Promise.resolve();
 }
 
 
 Queries.createTask = (data) => {
     const now = Date.now();
     const NULL = 'NULL';
-    const query = `INSERT INTO task (id, name, actualStart, actualEnd, baselineStart, baselineEnd, progressValue, parent, project, created_date) VALUES (NULL, "${data.name}", ${data.actualStart}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progress}, ${data.parent || NULL}, ${data.project}, ${now})`;
+    const query = `INSERT INTO task (id, name, actualStart, actualEnd, baselineStart, baselineEnd, progressValue, parent, project, last_modified) VALUES (NULL, "${data.name}", ${data.actualStart}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progress}, ${data.parent || NULL}, ${data.project}, ${now})`;
     return Queries
         .resetParents_(data.parentsToReset)
         .then(() => Queries.query(query))    
@@ -136,12 +139,13 @@ Queries.createTask = (data) => {
 
 
 Queries.updateTask = (data, parents) => {
-    // const now = Date.now();
-    // const NULL = 'NULL';
-    // if (parents && parents.length) {
-    //     let query = `UPDATE task SET name="${data.name}", actualStart=""`;
-    // }
-    // return Queries.query(``);
+    const now = Date.now();
+    const NULL = 'NULL';
+    const query = `UPDATE task SET name="${data.name}", actualStart=${data.actualStart}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progress}, last_modified=${now} WHERE id=${data.id}`;
+    return Queries
+        .query(query)
+        .then(() => Queries.getLastModifiedTask_(now))
+        .then(tasks => Queries.getTasksById(tasks[0].id));
 }
 
 module.exports = Queries;

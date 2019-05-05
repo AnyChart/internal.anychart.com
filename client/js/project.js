@@ -109,7 +109,34 @@ function commitTask() {
     preloader.visible(true);
     if (addState == 'edit') {
         if (controller.selectedItem) {
-            alert('EDIT!');
+            // updating existing task.
+            $.post(
+                '/update-task',
+                newTaskData,
+                (tasks) => {
+                    if (tasks.message) {
+                        //TODO add exception.
+                    } else {
+                        controller.chart.autoRedraw(false);
+                        controller.tree.dispatchEvents(false);
+                        const editedItem = controller.selectedItem;
+
+                        editedItem.set('name', newTaskData.name);
+                        editedItem.set('actualStart', newTaskData.actualStart);
+                        editedItem.set('actualEnd', newTaskData.actualEnd);
+                        editedItem.set('baselineStart', newTaskData.baselineStart);
+                        editedItem.set('baselineStart', newTaskData.baselineStart);
+                        editedItem.set('progressValue', newTaskData.progress);
+
+                        controller.tree.dispatchEvents(true);
+                        controller.chart.autoRedraw(true);
+                        controller.chart.fitAll();
+                    }
+                    resetTask();
+                    preloader.visible(false);
+                }
+            );
+
         } else {
             alert('Pretty bad bug is found! Debug it!');
         }
@@ -123,18 +150,26 @@ function commitTask() {
                 if (tasks.message) {
                     //TODO add exception.
                 } else {
-                    controller.chart.autoRedraw(false);
-                    controller.tree.dispatchEvents(false);
+                    // TODO reset parent to autovalues is disabled for a while because of gannt bug,
+                    // controller.chart.autoRedraw(false);
+                    // controller.tree.dispatchEvents(false);
+
+                    // controller.tree.addData(tasks, 'as-table');
+                    // parentsToReset.items.forEach(item => {
+                    //     item.del('actualStart');
+                    //     item.meta('actualStart', null);
+                    //     item.meta('autoStart', null);
+                    //     item.del('actualEnd');
+                    //     item.meta('actualEnd', null);
+                    //     item.meta('autoEnd', null);
+                    //     item.meta('autoProgress', null);
+                    //     item.del('progressValue');
+                    // });
+
+                    // controller.tree.dispatchEvents(true);
+                    // controller.chart.autoRedraw(true);
 
                     controller.tree.addData(tasks, 'as-table');
-                    parentsToReset.items.forEach(item => {
-                        item.del('actualStart');
-                        item.del('actualEnd');
-                        item.del('progressValue');
-                    });
-
-                    controller.tree.dispatchEvents(true);
-                    controller.chart.autoRedraw(true);
                     controller.chart.fitAll();
                 }
                 resetTask();
