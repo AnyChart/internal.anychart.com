@@ -128,7 +128,7 @@ Queries.resetParents_ = (parents = '[]') => {
 Queries.createTask = (data) => {
     const now = Date.now();
     const NULL = 'NULL';
-    const query = `INSERT INTO task (id, name, actualStart, actualEnd, baselineStart, baselineEnd, progressValue, parent, project, last_modified) VALUES (NULL, "${data.name}", ${data.actualStart}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progress}, ${data.parent || NULL}, ${data.project}, ${now})`;
+    const query = `INSERT INTO task (id, name, leader, actualStart, actualEnd, baselineStart, baselineEnd, progressValue, parent, project, last_modified) VALUES (NULL, "${data.name}", "${data.leader}", ${data.actualStart || NULL}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progress}, ${data.parent || NULL}, ${data.project}, ${now})`;
     return Queries
         .resetParents_(data.parentsToReset)
         .then(() => Queries.query(query))    
@@ -141,7 +141,8 @@ Queries.createTask = (data) => {
 Queries.updateTask = (data, parents) => {
     const now = Date.now();
     const NULL = 'NULL';
-    const query = `UPDATE task SET name="${data.name}", actualStart=${data.actualStart}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progress}, last_modified=${now} WHERE id=${data.id}`;
+    const query = `UPDATE task SET name="${data.name}", leader="${data.leader}", actualStart=${data.actualStart || NULL}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progress}, last_modified=${now} WHERE id=${data.id}`;
+    console.log(query)
     return Queries
         .query(query)
         .then(() => Queries.getLastModifiedTask_(now))

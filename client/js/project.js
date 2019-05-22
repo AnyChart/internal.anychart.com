@@ -10,6 +10,7 @@ controller.addEventListener('itemSelect', (e) => {
     $('#task_panel').css('display', 'block');
     $('#current_task_name').html(`Редактирование задачи "${controller.selectedItem.get('name')}"`);
     $('#task_name').val(e.item.get('name'));
+    $('#task_leader').val(e.item.get('leader'));
     const now = Date.now();
     $('#task_actual_start').datepicker('setUTCDate', new Date(e.item.get('actualStart')));
     $('#task_actual_end').datepicker('setUTCDate', new Date(e.item.get('actualEnd')));
@@ -68,6 +69,7 @@ function getParentsToResetChain(item = null, parentsData = { ids: [], items: [] 
 
 function commitTask() {
     const name = $('#task_name').val();
+    const leader = $('#task_leader').val();
     const as = $('#task_actual_start').datepicker('getDate');
     const ae = $('#task_actual_end').datepicker('getDate');
     const bs = $('#task_baseline_start').datepicker('getDate');
@@ -75,19 +77,19 @@ function commitTask() {
 
     let asUtc = null;
     if (as)
-        asUtc = as.getTime() - as.getTimezoneOffset() * 60000;
+        asUtc = as.getTime();
 
     let aeUtc = null;
     if (ae)
-        aeUtc = ae.getTime() - ae.getTimezoneOffset() * 60000 + (24 * 60 * 60 * 1000 - 1);
+        aeUtc = ae.getTime() + (24 * 60 * 60 * 1000 - 1);
 
     let bsUtc = null;
     if (bs)
-        bsUtc = bs.getTime() - bs.getTimezoneOffset() * 60000;
+        bsUtc = bs.getTime();
 
     let beUtc = null;
     if (be)
-        beUtc = be.getTime() - be.getTimezoneOffset() * 60000 + (24 * 60 * 60 * 1000 - 1);
+        beUtc = be.getTime() + (24 * 60 * 60 * 1000 - 1);
 
     const progress = $('#task_progress').val();
     const parent = controller.selectedItem ? controller.selectedItem.get('id') : null;
@@ -96,6 +98,7 @@ function commitTask() {
     const newTaskData = {
         id: parent, //This is used in "edit" mode - edits item by id.
         name: name,
+        leader: leader,
         actualStart: asUtc,
         actualEnd: aeUtc,
         baselineStart: bsUtc,
@@ -122,6 +125,7 @@ function commitTask() {
                         const editedItem = controller.selectedItem;
 
                         editedItem.set('name', newTaskData.name);
+                        editedItem.set('leader', newTaskData.leader);
                         editedItem.set('actualStart', newTaskData.actualStart);
                         editedItem.set('actualEnd', newTaskData.actualEnd);
                         editedItem.set('baselineStart', newTaskData.baselineStart);
@@ -182,6 +186,7 @@ function commitTask() {
 function resetTask() {
     $('#current_task_name').html('Добавление новой задачи');
     $('#task_name').val('');
+    $('#task_leader').val('');
     // $('#task_actual_start').val('');
     // $('#task_actual_end').val('');
     $('#task_progress').val('0');

@@ -7,32 +7,39 @@ class GanttController extends EventTarget {
     init(data, container = 'chart_container') {
         this.isInitial = !data.length;
         return new Promise((resolve, reject) => {
+            anychart.format.outputTimezone((new Date).getTimezoneOffset());
+            function boldLabelsOverrider(label, dataItem) {
+                if (dataItem.numChildren()) {
+                    label.fontWeight('bold').fontStyle('italic');
+                }
+            }
+
             this.tree = anychart.data.tree(data, 'as-table');
             this.chart = anychart.ganttProject();
 
-            const dg = this.chart.dataGrid();
-            const tl = this.chart.getTimeline();
+            const dataGrid = this.chart.dataGrid();
 
-            dg.column(1).title('Задача');
+            dataGrid.column(1).labelsOverrider(boldLabelsOverrider)
+
+            dataGrid.column(2, {
+                title: "Leader",
+                width: "45%",
+                format: "{%leader}",
+                labelsOverrider: boldLabelsOverrider
+            });
+
+            this.chart.splitterPosition('25%')
+
             this.chart.xScale().minimumGap(0.2).maximumGap(0.2);
 
             // Commented for a while because of timeline marker bug.
             // this.chart.getTimeline().lineMarker(0).value('current').stroke('2 green');
 
-            const tooltipFormat = function() {
-                let format = `Начало: ${anychart.format.dateTime(this.actualStart || this.autoStart, 'd MMM yyyy')}`;
-                if (this.actualEnd || this.autoEnd)
-                    format = `${format}\nОкончание: ${anychart.format.dateTime(this.actualEnd || this.autoEnd, 'd MMM yyyy')}`;
-                if (this.baselineStart)   
-                    format = `${format}\nПлан. старт: ${anychart.format.dateTime(this.baselineStart, 'd MMM yyyy')}`; 
-                if (this.baselineEnd)   
-                    format = `${format}\nПлан. окончание: ${anychart.format.dateTime(this.baselineEnd, 'd MMM yyyy')}`; 
-                format = `${format}\nПрогресс: ${Math.round(this.progress * 100)}%`;    
-                return format;
-            };
-
-            dg.tooltip().format(tooltipFormat);
-            tl.tooltip().format(tooltipFormat);
+            var now = (new Date()).getTime();
+            this.chart.getTimeline().lineMarker(0)
+                .value(now)
+                .stroke('2 red')
+                .zIndex(50);
 
             this.initChartListeners();
             this.initTreeListeners();
@@ -41,6 +48,7 @@ class GanttController extends EventTarget {
             this.chart.container(container);
             this.chart.draw();
             this.chart.fitAll();
+            this.chart.zoomTo(now - (3 * 24 * 60 * 60 * 1000), now + (6 * 24 * 60 * 60 * 1000));
             resolve();
         });
     }

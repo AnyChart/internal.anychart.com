@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <title>{{ projectName }}</title>
 
-    <link href="https://cdn.anychart.com/fonts/latest/css/anychart-font.min.css" type="text/css" rel="stylesheet">
-    <link href="https://cdn.anychart.com/releases/latest/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
+    <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
+    <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -24,7 +24,6 @@
 
     <!-- <script src="https://cdn.anychart.com/releases/v8/js/anychart-bundle.min.js"></script> -->
     <script src="/js/anychart-bundle.min.js"></script>
-    <script src="https://cdn.anychart.com/releases/latest/locales/ru-ru.js"></script>
     <script src="/js/bootstrap-datepicker.min.js"></script>
 
 
@@ -83,6 +82,11 @@
                     <div class="card-body">
                         <!-- NAME -->
                         <input id="task_name" type="text" class="form-control" placeholder="Имя задачи"
+                            aria-describedby="basic-addon2">
+                        <br />
+
+                        <!-- Leader -->
+                        <input id="task_leader" type="text" class="form-control" placeholder="Leader"
                             aria-describedby="basic-addon2">
                         <br />
 
