@@ -77,19 +77,19 @@ function commitTask() {
 
     let asUtc = null;
     if (as)
-        asUtc = as.getTime();
+        asUtc = as.getTime() - as.getTimezoneOffset() * 60000;
 
     let aeUtc = null;
     if (ae)
-        aeUtc = ae.getTime() + (24 * 60 * 60 * 1000 - 1);
+        aeUtc = ae.getTime() - ae.getTimezoneOffset() * 60000 + (24 * 60 * 60 * 1000 - 1);
 
     let bsUtc = null;
     if (bs)
-        bsUtc = bs.getTime();
+        bsUtc = bs.getTime() - bs.getTimezoneOffset() * 60000;
 
     let beUtc = null;
     if (be)
-        beUtc = be.getTime() + (24 * 60 * 60 * 1000 - 1);
+        beUtc = be.getTime() - be.getTimezoneOffset() * 60000 + (24 * 60 * 60 * 1000 - 1);
 
     const progress = $('#task_progress').val();
     const parent = controller.selectedItem ? controller.selectedItem.get('id') : null;

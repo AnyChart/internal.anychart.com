@@ -47,6 +47,7 @@ class GanttController extends EventTarget {
             this.chart.data(this.tree);
             this.chart.container(container);
             this.chart.draw();
+            this.chart.edit(true);
             this.chart.fitAll();
             this.chart.zoomTo(now - (3 * 24 * 60 * 60 * 1000), now + (6 * 24 * 60 * 60 * 1000));
             resolve();
