@@ -8,3 +8,4 @@ tmp
 tmp
 tests
 config.local.js
+dump.sql

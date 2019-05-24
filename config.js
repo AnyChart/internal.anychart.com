@@ -8,9 +8,9 @@ const config = fs.existsSync(LOCAL_CONFIG) ?
         port: 3000,
         dbHost: 'localhost',
         dbPort: 18889,
-        dbUser: 'ac_project_user',
-        dbName: 'ac_projects',
-        dbPassword: 'ac_gantt_project_password'
+        dbUser: 'dbUser',
+        dbName: 'dbName',
+        dbPassword: 'dbPassword'
     }
 
 module.exports = config;
