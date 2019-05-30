@@ -56,5 +56,6 @@ case $1 in
     ;;
     *)
         echo "expected 'make' or 'restore'";
+        exit 1
     ;;
 esac

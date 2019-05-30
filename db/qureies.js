@@ -142,7 +142,6 @@ Queries.updateTask = (data, parents) => {
     const now = Date.now();
     const NULL = 'NULL';
     const query = `UPDATE task SET name="${data.name}", leader="${data.leader}", actualStart=${data.actualStart || NULL}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progress}, last_modified=${now} WHERE id=${data.id}`;
-    console.log(query)
     return Queries
         .query(query)
         .then(() => Queries.getLastModifiedTask_(now))
