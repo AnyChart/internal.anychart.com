@@ -1,4 +1,4 @@
-const connect = require('./connect');
+const connect = require(__dirname+'/connect');
 
 class Queries { }
 

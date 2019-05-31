@@ -23,12 +23,18 @@ class GanttController extends EventTarget {
 
             dataGrid.column(2, {
                 title: "Leader",
-                width: "45%",
+                width: "25%",
                 format: "{%leader}",
                 labelsOverrider: boldLabelsOverrider
             });
+            dataGrid.column(3, {
+                title: "Progress",
+                width: "25%",
+                format: "{%progress}",
+                labelsOverrider: boldLabelsOverrider
+            });
 
-            this.chart.splitterPosition('25%')
+            this.chart.splitterPosition('30%')
 
             this.chart.xScale().minimumGap(0.2).maximumGap(0.2);
 

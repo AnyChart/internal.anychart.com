@@ -4,8 +4,8 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const engines = require('consolidate');
 
-const config = require('./config');
-const Queries = require('./db/qureies');
+const config = require(__dirname+'/config');
+const Queries = require(__dirname+'/db/qureies');
 
 const app = express();
 app.set('view options', { layout: false });

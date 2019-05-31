@@ -38,7 +38,13 @@ function parse_config_file(){
     done
 }
 
-run "parse_config_file < './config.local.js'"
+CONFIG_FILE=./config.local.js
+if [ ! -f "${CONFIG_FILE}" ]; then
+    CONFIG_FILE=./config.js
+fi
+
+run "parse_config_file < ${CONFIG_FILE}"
+
 echo "DB_USER: ${DB_USER}"
 echo "DB_PASS: ${DB_PASS}"
 echo "DB_NAME: ${DB_NAME}"

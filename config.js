@@ -1,13 +1,13 @@
 const fs = require('fs');
 
-const LOCAL_CONFIG = './config.local.js'
+const LOCAL_CONFIG = __dirname + '/config.local.js'
 
 const config = fs.existsSync(LOCAL_CONFIG) ?
-    require('./config.local') :
+    require(LOCAL_CONFIG.replace('.js','')) :
     {
         port: 3000,
         dbHost: 'localhost',
-        dbPort: 18889,
+        dbPort: 3306,
         dbUser: 'dbUser',
         dbName: 'dbName',
         dbPassword: 'dbPassword'
