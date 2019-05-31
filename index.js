@@ -42,6 +42,28 @@ app.get('/p/:id', (req, res) => {
         }));
 });
 
+app.get('/r/:id', (req, res) => {
+    const id = req.params.id;
+    Queries.getProjectById(req.params.id)
+        .then(projects => {
+            res.render('resource.html', { projectId: projects[0].id, projectName: projects[0].name });
+        })
+        .catch(err => res.json({
+            message: `Could not get project with id=${id} ${err}`,
+            error: err
+        }));
+});
+
+app.get('/resources/:projectId', (req, res) => {
+    const projectId = req.params.projectId;
+    Queries.getResourcesByProjectId(projectId)
+        .then(data => res.json(data))
+        .catch(err => res.json({
+            message: `Could not get tasks for project with id=${projectId}`,
+            error: err
+        }));
+});
+
 app.get('/tasks/:projectId', (req, res) => {
     const projectId = req.params.projectId;
     Queries.getTasksByProjectId(projectId)

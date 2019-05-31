@@ -7,7 +7,7 @@
 }
 {
     echo "restart app"
-    ssh root@anychart.stg "supervisorctl internal.anychart.stg restart"
+    ssh root@anychart.stg "supervisorctl restart internal.anychart.stg"
 } || {
     exit 1
 }

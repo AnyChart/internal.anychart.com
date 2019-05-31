@@ -79,6 +79,47 @@ Queries.filterNulls_ = (tasks) => {
 }
 
 /**
+ * Convert to resource.
+ * @param {Array.<Object>} - Incoming tasks.
+ * @private
+ * @returns {Promise}
+ */
+Queries.task2resource = (tasks) => {
+    let resources = {};
+    let tsks = new Array(tasks.length);
+    tasks.forEach(task => {
+        tsks[task.id] = task;
+    });
+    tasks.forEach(task => {
+        if (!task.leader) {
+            if (task.parent){
+                if (tsks[task.parent] && tsks[task.parent].leader)
+                    task.leader = tsks[task.parent].leader;
+                else 
+                    task.leader = "unassigned";
+            } else task.leader = "unassigned";
+        }
+        if (!resources[task.leader]){
+            resources[task.leader] = {
+                id: task.id,
+                name: task.leader,
+                periods:[]
+            }
+        }        
+        if (task.actualStart || task.baselineStart){
+            resources[task.leader]['periods'].push({
+                name: task.name,
+                id: task.id,
+                start: task.actualStart || task.baselineStart,
+                end: task.actualEnd || task.baselineEnd,
+                parentName: (task.parent ? tsks[task.parent].name : '')
+            })
+        }
+    });
+    return Promise.resolve(Object.values(resources).sort((a,b)=>{return a.name > b.name}));
+}
+
+/**
  * Gets tasks by project id.
  * @param {number} projectId - Project id.
  * @returns {Promise}
@@ -87,6 +128,17 @@ Queries.getTasksByProjectId = (projectId) => {
     return Queries
         .query(`SELECT * FROM task WHERE project=${projectId}`)
         .then(tasks => Queries.filterNulls_(tasks));
+}
+
+/**
+ * Gets resources by project id.
+ * @param {number} projectId - Project id.
+ * @returns {Promise}
+ */
+Queries.getResourcesByProjectId = (projectId) => {
+    return Queries
+        .query(`SELECT * FROM task WHERE project=${projectId}`)
+        .then(tasks => Queries.task2resource(tasks));
 }
 
 /**
