@@ -13,21 +13,21 @@ class GanttController extends EventTarget {
             const dg = this.chart.dataGrid();
             const tl = this.chart.getTimeline();
 
-            dg.column(1).title('Задача');
+            dg.column(1).title('Task');
             this.chart.xScale().minimumGap(0.2).maximumGap(0.2);
 
             // Commented for a while because of timeline marker bug.
             // this.chart.getTimeline().lineMarker(0).value('current').stroke('2 green');
 
             const tooltipFormat = function() {
-                let format = `Начало: ${anychart.format.dateTime(this.actualStart || this.autoStart, 'd MMM yyyy')}`;
+                let format = `Actual Start: ${anychart.format.dateTime(this.actualStart || this.autoStart, 'd MMM yyyy')}`;
                 if (this.actualEnd || this.autoEnd)
-                    format = `${format}\nОкончание: ${anychart.format.dateTime(this.actualEnd || this.autoEnd, 'd MMM yyyy')}`;
+                    format = `${format}\Actual End: ${anychart.format.dateTime(this.actualEnd || this.autoEnd, 'd MMM yyyy')}`;
                 if (this.baselineStart)   
-                    format = `${format}\nПлан. старт: ${anychart.format.dateTime(this.baselineStart, 'd MMM yyyy')}`; 
+                    format = `${format}\nPlanned Start: ${anychart.format.dateTime(this.baselineStart, 'd MMM yyyy')}`; 
                 if (this.baselineEnd)   
-                    format = `${format}\nПлан. окончание: ${anychart.format.dateTime(this.baselineEnd, 'd MMM yyyy')}`; 
-                format = `${format}\nПрогресс: ${Math.round(this.progress * 100)}%`;    
+                    format = `${format}\nPlanned End: ${anychart.format.dateTime(this.baselineEnd, 'd MMM yyyy')}`; 
+                format = `${format}\nProgress: ${Math.round(this.progress * 100)}%`;    
                 return format;
             };
 

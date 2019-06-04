@@ -9,7 +9,7 @@ function addProject(project) {
                         <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
                             <div class="d-flex justify-content-between align-items-center w-100">
                                 <strong class="text-gray-dark"><a href="/p/${project.id}">${project.name}</a></strong>
-                                <a href="/delete-project/${project.id}">Удалить (пока не работает)</a>
+                                <a href="/delete-project/${project.id}">Remove (doesn't work for a while)</a>
                             </div>
                             <span class="d-block">${anychart.format.dateTime(project.last_modified)}</span>
                         </div>

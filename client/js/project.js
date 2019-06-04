@@ -6,23 +6,23 @@ preloader.visible(true);
 const controller = new GanttController();
 
 controller.addEventListener('itemSelect', (e) => {
-    $('#add_task_button').html('Добавить подзадачу');
+    $('#add_task_button').html('Add subtask');
     $('#task_panel').css('display', 'block');
-    $('#current_task_name').html(`Редактирование задачи "${controller.selectedItem.get('name')}"`);
+    $('#current_task_name').html(`Editing task "${controller.selectedItem.get('name')}"`);
     $('#task_name').val(e.item.get('name'));
     const now = Date.now();
     $('#task_actual_start').datepicker('setUTCDate', new Date(e.item.get('actualStart')));
     $('#task_actual_end').datepicker('setUTCDate', new Date(e.item.get('actualEnd')));
     const progress = Math.round(e.item.get('progressValue') * 100);
     $('#task_progress').val(progress);
-    $('#progress_label').html(`Прогресс: ${progress}%`);
+    $('#progress_label').html(`Progress: ${progress}%`);
     addState = 'edit';
 
     $('#task_name').focus();
 });
 
 controller.addEventListener('itemDeselect', (e) => {
-    $('#add_task_button').html('Добавить задачу');
+    $('#add_task_button').html('Add task');
     resetTask();
     addState = 'new';
     $('#task_panel').css('display', 'none');
@@ -48,8 +48,8 @@ function addTask() {
     addState = 'new';
     if (controller.selectedItem) {
         resetTask();
-        $('#current_task_name').html(`Добавление подзадачи в "${controller.selectedItem.get('name')}"`);
-        $('#progress_label').html('Прогресс: 0%');
+        $('#current_task_name').html(`Adding subtask to "${controller.selectedItem.get('name')}"`);
+        $('#progress_label').html('Progress: 0%');
     }
     $('#task_name').focus();
 }
@@ -180,7 +180,7 @@ function commitTask() {
 }
 
 function resetTask() {
-    $('#current_task_name').html('Добавление новой задачи');
+    $('#current_task_name').html('Adding new task');
     $('#task_name').val('');
     // $('#task_actual_start').val('');
     // $('#task_actual_end').val('');
@@ -197,5 +197,5 @@ function closeTask() {
 }
 
 function changeProgress(val) {
-    $('#progress_label').html(`Прогресс: ${val}%`);
+    $('#progress_label').html(`Progress: ${val}%`);
 }

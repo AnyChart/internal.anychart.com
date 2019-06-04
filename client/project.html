@@ -55,18 +55,18 @@
                     <div class="card-header">
                         <nav class="navbar navbar-expand-sm justify-content-end">
                             <button class="btn btn-primary" onclick="controller.chart.collapseAll()"><span
-                                    class="ac ac-position-top"></span> Свернуть все</button>&nbsp;
+                                    class="ac ac-position-top"></span> Collapse all</button>&nbsp;
                             <button class="btn btn-primary" onclick="controller.chart.expandAll()"><span
-                                    class="ac ac-position-bottom"></span> Развернуть все</button>&nbsp;
+                                    class="ac ac-position-bottom"></span> Expand all</button>&nbsp;
                             <button class="btn btn-primary" onclick="controller.chart.zoomIn()"><span
-                                    class="ac ac-plus"></span> Ближе</button>&nbsp;
+                                    class="ac ac-plus"></span> Zoom In</button>&nbsp;
                             <button class="btn btn-primary" onclick="controller.chart.zoomOut()"><span
-                                    class="ac ac-minus"></span> Дальше</button>&nbsp;
+                                    class="ac ac-minus"></span> Zoom Out</button>&nbsp;
                             <button class="btn btn-primary" onclick="controller.chart.fitAll()"><span
-                                    class="ac ac-position-center"></span> Показать все</button>
+                                    class="ac ac-position-center"></span> Fit all</button>
 
                             <button class="btn btn-outline-success ml-auto mr-1" onclick="addTask()"
-                                id="add_task_button">Добавить задачу</button>
+                                id="add_task_button">Add task</button>
                         </nav>
 
                     </div>
@@ -77,19 +77,19 @@
                 <div class="card">
                     <div class="card-header">
                         <nav class="navbar navbar-expand-sm justify-content-end">
-                            <span class="nav-link" id="current_task_name">Добавление новой задачи</span>
+                            <span class="nav-link" id="current_task_name">Adding new task</span>
                         </nav>
                     </div>
                     <div class="card-body">
                         <!-- NAME -->
-                        <input id="task_name" type="text" class="form-control" placeholder="Имя задачи"
+                        <input id="task_name" type="text" class="form-control" placeholder="Task name"
                             aria-describedby="basic-addon2">
                         <br />
 
                         <!-- ACTUAL START -->
                         <div class="input-group mb-3" id="actual_start_dp">
                             <input id="task_actual_start" type="text" class="form-control"
-                                placeholder="Фактический старт" aria-describedby="basic-addon2">
+                                placeholder="Actual Start" aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button"><span
                                         class="ac ac-v-line-dotted"></span></button>
@@ -99,7 +99,7 @@
                         <!-- ACTUAL END -->
                         <div class="input-group mb-3" id="actual_end_dp">
                             <input id="task_actual_end" type="text" class="form-control"
-                                placeholder="Фактическое окончание" aria-describedby="basic-addon2">
+                                placeholder="Actual End" aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button"><span
                                         class="ac ac-v-line-dotted"></span></button>
@@ -108,7 +108,7 @@
 
                         <!-- BASELINE START -->
                         <div class="input-group mb-3" id="baseline_start_dp">
-                            <input id="task_baseline_start" type="text" class="form-control" placeholder="Планируемый старт"
+                            <input id="task_baseline_start" type="text" class="form-control" placeholder="Planned Start"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button"><span
@@ -118,7 +118,7 @@
 
                         <!-- BASELINE END -->
                         <div class="input-group mb-3" id="baseline_end_dp">
-                            <input id="task_baseline_end" type="text" class="form-control" placeholder="Планируемое окончание"
+                            <input id="task_baseline_end" type="text" class="form-control" placeholder="Planned End"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button"><span
@@ -144,11 +144,11 @@
                                 <option value="90">
                                 <option value="100" label="100%">
                             </datalist>
-                            <label for="task_progress" id="progress_label">Прогресс: 0%</label>
+                            <label for="task_progress" id="progress_label">Progress: 0%</label>
                         </div>
 
-                        <button class="btn btn-outline-success ml-auto mr-1" onclick="commitTask()">Применить</button>
-                        <button class="btn btn-outline-secondary ml-auto mr-1" onclick="closeTask()">Закрыть</button>
+                        <button class="btn btn-outline-success ml-auto mr-1" onclick="commitTask()">Apply</button>
+                        <button class="btn btn-outline-secondary ml-auto mr-1" onclick="closeTask()">Close</button>
 
                     </div>
                 </div>
@@ -160,14 +160,12 @@
     <script>
         const projectId = {{ projectId }};
         let addState = 'new'; // Allowed states are 'new', 'edit'.
-        anychart.format.outputLocale('ru-ru');
     </script>
     <script>
         const datePickerConfig = {
             format: 'dd MM yyyy',
             weekStart: 1,
             todayBtn: true,
-            language: "ru",
             orientation: "left auto",
             autoclose: true,
             todayHighlight: true
