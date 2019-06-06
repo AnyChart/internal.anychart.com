@@ -48,6 +48,7 @@ CREATE TABLE `project` (
 CREATE TABLE `task` (
   `id` int(11) NOT NULL,
   `name` varchar(1024) NOT NULL,
+  `leader` varchar(1024) DEFAULT NULL,
   `actualStart` bigint(11) DEFAULT NULL,
   `actualEnd` bigint(11) DEFAULT NULL,
   `baselineStart` bigint(11) DEFAULT NULL,

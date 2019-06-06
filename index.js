@@ -1,9 +1,16 @@
+#!/usr/bin/env node
+
 const express = require('express');
 const bodyParser = require('body-parser')
 const engines = require('consolidate');
 
-const config = require('./config');
-const Queries = require('./db/qureies');
+const config = require(__dirname + '/config');
+const Queries = require(__dirname + '/db/qureies');
+
+const projects = require('./routes/projects');
+const tasks = require('./routes/tasks');
+const users = require('./routes/users');
+const resources = require('./routes/resources');
 
 const app = express();
 app.set('view options', { layout: false });
@@ -19,64 +26,32 @@ app.get('/', (req, res) => {
     res.render('/client/index.html');
 });
 
-app.get('/projects', (req, res) => {
-    Queries.getProjects()
-        .then(data => res.json(data))
-        .catch(err => res.json({
-            message: 'Could not connect to database',
-            error: err
-        }));
-});
+app.use('/projects', projects);
+app.use('/tasks', tasks);
+app.use('/users', users);
+app.use('/resources', resources);
 
-app.get('/p/:id', (req, res) => {
-    const id = req.params.id;
-    Queries.getProjectById(req.params.id)
-        .then(projects => {
-            res.render('project.html', { projectId: projects[0].id, projectName: projects[0].name });
-        })
-        .catch(err => res.json({
-            message: `Could not get project with id=${id}`,
-            error: err
-        }));
-});
+// app.get('/r/:id', (req, res) => {
+//     const id = req.params.id;
+//     Queries.getProjectById(req.params.id)
+//         .then(projects => {
+//             res.render('resource.html', { projectId: projects[0].id, projectName: projects[0].name });
+//         })
+//         .catch(err => res.json({
+//             message: `Could not get project with id=${id} ${err}`,
+//             error: err
+//         }));
+// });
 
-app.get('/tasks/:projectId', (req, res) => {
-    const projectId = req.params.projectId;
-    Queries.getTasksByProjectId(projectId)
-        .then(data => res.json(data))
-        .catch(err => res.json({
-            message: `Could not get tasks for project with id=${projectId}`,
-            error: err
-        }));
-});
-
-app.post('/add-project', (req, res) => {
-    const newProjectName = req.body.name;
-    Queries.createProject(newProjectName)
-        .then(newProject => res.json(newProject[0]))
-        .catch(err => res.json({
-            message: `Could not create project \"${newProjectName}\"`,
-            error: err
-        }));
-});
-
-app.post('/add-task', (req, res) => {
-    Queries.createTask(req.body)
-        .then(newTasks => res.json(newTasks))
-        .catch(err => res.json({
-            message: `Could not create task \"${req.body.name}\"`,
-            error: err
-        }));
-});
-
-app.post('/update-task', (req, res) => {
-    Queries.updateTask(req.body)
-        .then(newTasks => res.json(newTasks))
-        .catch(err => res.json({
-            message: `Could not create task \"${req.body.name}\"`,
-            error: err
-        }));
-});
+// app.get('/resources/:projectId', (req, res) => {
+//     const projectId = req.params.projectId;
+//     Queries.getResourcesByProjectId(projectId)
+//         .then(data => res.json(data))
+//         .catch(err => res.json({
+//             message: `Could not get tasks for project with id=${projectId}`,
+//             error: err
+//         }));
+// });
 
 app.listen(config.port, () => {
     console.log(`Anychart Gantt Project Editor server started! Listening port ${config.port}.`);

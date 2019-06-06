@@ -3,30 +3,41 @@
 <head>
     <meta charset="utf-8">
     <title>Active Projects</title>
+    <link rel="shortcut icon" type="image/png" href="/anychart.png"/>
 
-    <link href="https://cdn.anychart.com/fonts/latest/css/anychart-font.min.css" type="text/css" rel="stylesheet">
-    <link href="https://cdn.anychart.com/releases/latest/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="/anychart.png"/>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
+    <link href="/css/external/anychart-ui.min.css" type="text/css" rel="stylesheet">
+    <link href="/css/external/bootstrap.min.css" type="text/css" rel="stylesheet" >
+    <link href="/css/external/bootstrap-datepicker.min.css" type="text/css" rel="stylesheet">
 
-    <script src="https://code.jquery.com/jquery-3.4.0.min.js"></script>
+    <script src="/js/external/jquery-3.4.0.min.js"></script>
+    <script src="/js/external/popper.min.js"></script>
+    <script src="/js/external/bootstrap.min.js"> </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-        crossorigin="anonymous"></script>
+    <script src="/js/external/anychart-bundle.min.js"></script>
+    <script src="/js/external/bootstrap-datepicker.min.js"></script>
 
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-        crossorigin="anonymous"></script>
-
-    <script src="https://cdn.anychart.com/releases/v8/js/anychart-bundle.min.js"></script>
+    <script src="/js/ListStorage.js"></script>
 </head>
 
 <body>
     <nav class="navbar navbar-light bg-faded">
-        <a class="navbar-brand" href="#"><img class="navbar-brand" src="/images/ac.png" width="30px"/> Current Projects</a>
-        <button class="btn btn-outline-success" type="button" data-toggle="modal" data-target="#newProject">Create Project</button>
+        <a class="navbar-brand" href="#"><img class="navbar-brand" src="/images/ac.png" width="30px" /> Current
+            Projects</a>
+        <div class="btn-group">
+            <a class="nav-link" href="/users">Manage users</a>
+            <button class="btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">Create Project</button>
+            <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#newProject"
+                    data-action="dummy"><span class="ac ac-anygantt"></span> Create dummy project for all active
+                    assignees</a>
+                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#newProject"
+                    data-action="empty"><span class="ac ac-edit"></span> Create empty project</a>
+            </div>
+        </div>
     </nav>
 
     <div class="my-3 p-3 bg-white rounded shadow-sm" id="current_projects"></div>
@@ -35,7 +46,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">New Project</h5>
+                    <h5 class="modal-title">Project Info</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -57,4 +68,5 @@
     <script src="/js/index.js"> </script>
 
 </body>
+
 </html>

@@ -3,13 +3,13 @@
 <head>
     <meta charset="utf-8">
     <title>{{ projectName }}</title>
-    <link rel="shortcut icon" type="image/png" href="/anychart.png" />
+    <link rel="shortcut icon" type="image/png" href="/anychart.png"/>
 
-    <link rel="shortcut icon" type="image/png" href="/anychart.png" />
+    <link rel="shortcut icon" type="image/png" href="/anychart.png"/>
 
     <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
     <link href="/css/external/anychart-ui.min.css" type="text/css" rel="stylesheet">
-    <link href="/css/external/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="/css/external/bootstrap.min.css" type="text/css" rel="stylesheet" >
     <link href="/css/external/bootstrap-datepicker.min.css" type="text/css" rel="stylesheet">
 
     <script src="/js/external/jquery-3.4.0.min.js"></script>
@@ -20,6 +20,7 @@
     <script src="/js/external/bootstrap-datepicker.min.js"></script>
 
     <script src="/js/ListStorage.js"></script>
+
 
     <style>
         html,
@@ -39,44 +40,58 @@
     <nav class="navbar navbar-light bg-faded">
         <a class="navbar-brand" href="/"><img class="navbar-brand" src="/images/ac.png" width="30px" /> <span
                 class="ac ac-chevron-left"></span> {{ projectName }}</a>
-        <div class="btn-group">
-            <a class="nav-link" href="#" onclick="viewResource()">View Resource Chart</a>
-            <button class="btn btn-outline-success" type="button" onclick="addTask()" id="add_task_button">Add Task</button>
-        </div>
     </nav>
 
     <div class="container-fluid" style="height: 100%; max-height: 600px">
         <div class="row">
             <div class="col">
                 <div class="card">
+                    <div class="card-header">
+                        <nav class="navbar navbar-expand-sm justify-content-end">
+                            <button class="btn btn-primary" onclick="controller.chart.collapseAll()"><span
+                                    class="ac ac-position-top"></span> Свернуть все</button>&nbsp;
+                            <button class="btn btn-primary" onclick="controller.chart.expandAll()"><span
+                                    class="ac ac-position-bottom"></span> Развернуть все</button>&nbsp;
+                            <button class="btn btn-primary" onclick="controller.chart.zoomIn()"><span
+                                    class="ac ac-plus"></span> Ближе</button>&nbsp;
+                            <button class="btn btn-primary" onclick="controller.chart.zoomOut()"><span
+                                    class="ac ac-minus"></span> Дальше</button>&nbsp;
+                            <button class="btn btn-primary" onclick="controller.chart.fitAll()"><span
+                                    class="ac ac-position-center"></span> Показать все</button>
+
+                            <button class="btn btn-outline-warning ml-auto mr-1" onclick="window.location.href = window.location.href.replace('/r/','/p/')"
+                                id="switcher_proj_resource"><span class="ac ac-preview"></span> View Project Chart</button>
+                            
+                                <button class="btn btn-outline-success ml-auto mr-1" onclick="addTask()"
+                                id="add_task_button">Добавить задачу</button>
+                        </nav>
+
+                    </div>
                     <div class="card-body" id="chart_container"></div>
                 </div>
             </div>
             <div class="col-3" id="task_panel" style="display: none">
                 <div class="card">
                     <div class="card-header">
-                        <span class="nav-link" id="current_task_name">Adding new task</span>
+                        <nav class="navbar navbar-expand-sm justify-content-end">
+                            <span class="nav-link" id="current_task_name">Добавление новой задачи</span>
+                        </nav>
                     </div>
                     <div class="card-body">
                         <!-- NAME -->
-                        <input id="task_name" type="text" class="form-control" placeholder="Task name"
+                        <input id="task_name" type="text" class="form-control" placeholder="Имя задачи"
                             aria-describedby="basic-addon2">
                         <br />
 
                         <!-- Leader -->
-                        <!-- <input id="task_leader" type="text" class="form-control" placeholder="Leader"
-                            aria-describedby="basic-addon2"> -->
-
-                            <select class="form-control" id="assignee">
-                                <option selected>Select Assignee</option>
-                            </select>
-
+                        <input id="task_leader" type="text" class="form-control" placeholder="Leader"
+                            aria-describedby="basic-addon2">
                         <br />
 
                         <!-- ACTUAL START -->
                         <div class="input-group mb-3" id="actual_start_dp">
-                            <input id="task_actual_start" type="text" class="form-control" placeholder="Actual Start"
-                                aria-describedby="basic-addon2">
+                            <input id="task_actual_start" type="text" class="form-control"
+                                placeholder="Фактический старт" aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button"><span
                                         class="ac ac-v-line-dotted"></span></button>
@@ -85,8 +100,8 @@
 
                         <!-- ACTUAL END -->
                         <div class="input-group mb-3" id="actual_end_dp">
-                            <input id="task_actual_end" type="text" class="form-control" placeholder="Actual End"
-                                aria-describedby="basic-addon2">
+                            <input id="task_actual_end" type="text" class="form-control"
+                                placeholder="Фактическое окончание" aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button"><span
                                         class="ac ac-v-line-dotted"></span></button>
@@ -95,7 +110,7 @@
 
                         <!-- BASELINE START -->
                         <div class="input-group mb-3" id="baseline_start_dp">
-                            <input id="task_baseline_start" type="text" class="form-control" placeholder="Planned Start"
+                            <input id="task_baseline_start" type="text" class="form-control" placeholder="Планируемый старт"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button"><span
@@ -105,7 +120,7 @@
 
                         <!-- BASELINE END -->
                         <div class="input-group mb-3" id="baseline_end_dp">
-                            <input id="task_baseline_end" type="text" class="form-control" placeholder="Planned End"
+                            <input id="task_baseline_end" type="text" class="form-control" placeholder="Планируемое окончание"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button"><span
@@ -131,11 +146,11 @@
                                 <option value="90">
                                 <option value="100" label="100%">
                             </datalist>
-                            <label for="task_progress" id="progress_label">Progress: 0%</label>
+                            <label for="task_progress" id="progress_label">Прогресс: 0%</label>
                         </div>
 
-                        <button class="btn btn-outline-success ml-auto mr-1" onclick="commitTask()">Apply</button>
-                        <button class="btn btn-outline-secondary ml-auto mr-1" onclick="closeTask()">Close</button>
+                        <button class="btn btn-outline-success ml-auto mr-1" onclick="commitTask()">Применить</button>
+                        <button class="btn btn-outline-secondary ml-auto mr-1" onclick="closeTask()">Закрыть</button>
 
                     </div>
                 </div>
@@ -146,13 +161,18 @@
 
     <script>
         const projectId = {{ projectId }};
+        const min = {{ min }};
+        const max = {{ max }};
+        
         let addState = 'new'; // Allowed states are 'new', 'edit'.
+        anychart.format.outputLocale('ru-ru');
     </script>
     <script>
         const datePickerConfig = {
             format: 'dd MM yyyy',
             weekStart: 1,
             todayBtn: true,
+            language: "ru",
             orientation: "left auto",
             autoclose: true,
             todayHighlight: true
@@ -212,10 +232,10 @@
             .datepicker()
             .on('changeDate', function (e) {
 
-            });
+            });    
     </script>
-    <script src="/js/gantt-controller.js"></script>
-    <script src="/js/project.js"></script>
+    <script src="/js/resource-controller.js"></script>
+    <script src="/js/resource.js"></script>
 </body>
 
 </html>

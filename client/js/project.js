@@ -4,12 +4,14 @@ preloader.render();
 preloader.visible(true);
 
 const controller = new GanttController();
+const usersStorage = new ListStorage();
 
 controller.addEventListener('itemSelect', (e) => {
     $('#add_task_button').html('Add subtask');
     $('#task_panel').css('display', 'block');
     $('#current_task_name').html(`Editing task "${controller.selectedItem.get('name')}"`);
     $('#task_name').val(e.item.get('name'));
+    $('#task_leader').val(e.item.get('leader'));
     const now = Date.now();
     $('#task_actual_start').datepicker('setUTCDate', new Date(e.item.get('actualStart')));
     $('#task_actual_end').datepicker('setUTCDate', new Date(e.item.get('actualEnd')));
@@ -36,11 +38,19 @@ anychart.onDocumentReady(() => {
         .then(tasks => controller.init(tasks))
         .then(() => {
             $('#task_panel').css('display', 'none');
-            preloader.visible(false);
+            return Promise.resolve();
         })
-        .catch(err => {
-            preloader.visible(false);
-        });
+        .then(() => {
+            fetch('/users/data')
+                .then(r => r.json())
+                .then(users => {
+                    console.log(users);
+                    usersStorage.sync(users);
+                    buildUsersDropdown();
+                    return Promise.resolve();
+                })
+                .then(() => preloader.visible(false));
+        })
 });
 
 function addTask() {
@@ -52,6 +62,22 @@ function addTask() {
         $('#progress_label').html('Progress: 0%');
     }
     $('#task_name').focus();
+}
+
+function buildUsersDropdown() {
+    Object
+        .values(usersStorage.storage)
+        .sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0)
+        .forEach(user => {
+            console.log(user);
+            let option = $('<option>');
+            option
+                .attr('value', user.id)
+                .attr('id', `assignee-option-${user.id}`)
+                .html(`${user.name}`);
+            $('#assignee').append(option);
+        })
+
 }
 
 function getParentsToResetChain(item = null, parentsData = { ids: [], items: [] }) {
@@ -68,6 +94,7 @@ function getParentsToResetChain(item = null, parentsData = { ids: [], items: [] 
 
 function commitTask() {
     const name = $('#task_name').val();
+    const leader = $('#task_leader').val();
     const as = $('#task_actual_start').datepicker('getDate');
     const ae = $('#task_actual_end').datepicker('getDate');
     const bs = $('#task_baseline_start').datepicker('getDate');
@@ -96,6 +123,7 @@ function commitTask() {
     const newTaskData = {
         id: parent, //This is used in "edit" mode - edits item by id.
         name: name,
+        leader: leader,
         actualStart: asUtc,
         actualEnd: aeUtc,
         baselineStart: bsUtc,
@@ -111,7 +139,7 @@ function commitTask() {
         if (controller.selectedItem) {
             // updating existing task.
             $.post(
-                '/update-task',
+                '/tasks/update',
                 newTaskData,
                 (tasks) => {
                     if (tasks.message) {
@@ -122,6 +150,7 @@ function commitTask() {
                         const editedItem = controller.selectedItem;
 
                         editedItem.set('name', newTaskData.name);
+                        editedItem.set('leader', newTaskData.leader);
                         editedItem.set('actualStart', newTaskData.actualStart);
                         editedItem.set('actualEnd', newTaskData.actualEnd);
                         editedItem.set('baselineStart', newTaskData.baselineStart);
@@ -144,7 +173,7 @@ function commitTask() {
     } else {
         // Adding new task.
         $.post(
-            '/add-task',
+            '/tasks/add',
             newTaskData,
             (tasks) => {
                 if (tasks.message) {
@@ -182,6 +211,7 @@ function commitTask() {
 function resetTask() {
     $('#current_task_name').html('Adding new task');
     $('#task_name').val('');
+    $('#task_leader').val('');
     // $('#task_actual_start').val('');
     // $('#task_actual_end').val('');
     $('#task_progress').val('0');
@@ -198,4 +228,12 @@ function closeTask() {
 
 function changeProgress(val) {
     $('#progress_label').html(`Progress: ${val}%`);
+}
+
+function viewResource() {
+    const scale = controller.chart.xScale();
+    const range = scale.getRange();
+    const min = range.min;
+    const max = range.max;
+    window.location.href = `/resources/${projectId}/${min}-${max}`;
 }

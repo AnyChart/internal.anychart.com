@@ -1,4 +1,4 @@
-const connect = require('./connect');
+const connect = require(__dirname+'/connect');
 
 class Queries { }
 
@@ -36,7 +36,7 @@ Queries.getLastModifiedProject_ = (date) => {
  * @returns {Promise}
  */
 Queries.getProjects = () => {
-    return Queries.query('SELECT * FROM project ORDER BY last_modified DESC');
+    return Queries.query('SELECT * FROM project WHERE deleted=0 ORDER BY last_modified DESC');
 }
 
 /**
@@ -57,7 +57,69 @@ Queries.createProject = (name) => {
     const now = Date.now();
     return Queries.query(`INSERT INTO project (id, name, last_modified) VALUES (NULL, "${name}", ${now})`)
         .then(() => Queries.getLastModifiedProject_(now))
-        .then(lastModified =>Queries.getProjectById(lastModified[0].id))
+        .then(lastModified => Queries.getProjectById(lastModified[0].id))
+        .catch(err => Promise.reject(err));
+}
+
+/**
+ * Updates project data.
+ * @param {Object} data - Project data.
+ * @returns {Promise}
+ */
+Queries.updateProject = (data) => {
+    const now = Date.now();
+    return Queries.query(`UPDATE project SET name="${data.name}", last_modified=${now}, deleted="${data.deleted}" WHERE id=${data.id}`)
+        .then(() => Queries.getLastModifiedProject_(now))
+        .then(lastModified => Queries.getProjectById(lastModified[0].id))
+        .catch(err => Promise.reject(err));
+}
+
+// ------- Users queries.
+
+Queries.getUsers = () => {
+    return Queries.query('SELECT * FROM user WHERE deleted=0 ORDER BY name');
+}
+
+/**
+ * Gets just inserted user.
+ * @param {number} date - Modified date.
+ * @private
+ * @returns {Promise}
+ */
+Queries.getLastModifiedUser_ = (date) => {
+    return Queries.query(`SELECT * FROM user WHERE last_modified=${date} LIMIT 1`);
+}
+
+/**
+ * Gets project by id.
+ * @param {number} id - Project id.
+ * @returns {Promise}
+ */
+Queries.getUserById = (id) => {
+    return Queries.query(`SELECT * FROM user WHERE id=${id}`);
+}
+
+/**
+ * Creates user.
+ */
+Queries.createUser = (data) => {
+    const now = Date.now();
+    return Queries.query(`INSERT INTO user (id, name, avatar, last_modified) VALUES (NULL, "${data.name}", "${data.avatar}", ${now})`)
+        .then(() => Queries.getLastModifiedUser_(now))
+        .then(lastModified => Queries.getUserById(lastModified[0].id))
+        .catch(err => Promise.reject(err));
+}
+
+/**
+ * Updates user data.
+ * @param {Object} data - Project data.
+ * @returns {Promise}
+ */
+Queries.updateUser = (data) => {
+    const now = Date.now();
+    return Queries.query(`UPDATE user SET name="${data.name}", last_modified=${now}, deleted="${data.deleted}", avatar="${data.avatar}" WHERE id=${data.id}`)
+        .then(() => Queries.getLastModifiedUser_(now))
+        .then(lastModified => Queries.getUserById(lastModified[0].id))
         .catch(err => Promise.reject(err));
 }
 
@@ -79,14 +141,70 @@ Queries.filterNulls_ = (tasks) => {
 }
 
 /**
+ * Convert to resource.
+ * @param {Array.<Object>} - Incoming tasks.
+ * @private
+ * @returns {Promise}
+ */
+Queries.task2resource = (tasks) => {
+    let resources = {};
+    let tsks = new Array(tasks.length);
+    tasks.forEach(task => {
+        tsks[task.id] = task;
+    });
+    tasks.forEach(task => {
+        if (!task.leader) {
+            if (task.parent){
+                if (tsks[task.parent] && tsks[task.parent].leader)
+                    task.leader = tsks[task.parent].leader;
+                else 
+                    task.leader = "unassigned";
+            } else task.leader = "unassigned";
+        }
+        if (!resources[task.leader]){
+            resources[task.leader] = {
+                id: task.id,
+                name: task.leader,
+                periods:[]
+            }
+        }        
+        if (task.actualStart || task.baselineStart){
+            resources[task.leader]['periods'].push({
+                name: task.name,
+                id: task.id,
+                start: task.actualStart || task.baselineStart,
+                end: task.actualEnd || task.baselineEnd,
+                parentName: (task.parent ? tsks[task.parent].name : '')
+            })
+        }
+    });
+    return Promise.resolve(Object.values(resources).sort((a,b)=>{return a.name > b.name}));
+}
+
+/**
  * Gets tasks by project id.
  * @param {number} projectId - Project id.
  * @returns {Promise}
  */
 Queries.getTasksByProjectId = (projectId) => {
     return Queries
+        .query(`SELECT task.*, user.id AS userId, user.name AS userName, user.avatar AS userAvatar, user.deleted AS userDeleted
+            FROM task, user WHERE task.project=${projectId} AND task.assignee=user.id`)
+        .then(tasks => { 
+            console.log(tasks);
+            return Queries.filterNulls_(tasks)
+        });
+}
+
+/**
+ * Gets resources by project id.
+ * @param {number} projectId - Project id.
+ * @returns {Promise}
+ */
+Queries.getResourcesByProjectId = (projectId) => {
+    return Queries
         .query(`SELECT * FROM task WHERE project=${projectId}`)
-        .then(tasks => Queries.filterNulls_(tasks));
+        .then(tasks => Queries.task2resource(tasks));
 }
 
 /**
@@ -128,7 +246,7 @@ Queries.resetParents_ = (parents = '[]') => {
 Queries.createTask = (data) => {
     const now = Date.now();
     const NULL = 'NULL';
-    const query = `INSERT INTO task (id, name, actualStart, actualEnd, baselineStart, baselineEnd, progressValue, parent, project, last_modified) VALUES (NULL, "${data.name}", ${data.actualStart}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progress}, ${data.parent || NULL}, ${data.project}, ${now})`;
+    const query = `INSERT INTO task (id, name, leader, actualStart, actualEnd, baselineStart, baselineEnd, progressValue, parent, project, last_modified) VALUES (NULL, "${data.name}", "${data.leader}", ${data.actualStart || NULL}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progress}, ${data.parent || NULL}, ${data.project}, ${now})`;
     return Queries
         .resetParents_(data.parentsToReset)
         .then(() => Queries.query(query))    
@@ -141,7 +259,7 @@ Queries.createTask = (data) => {
 Queries.updateTask = (data, parents) => {
     const now = Date.now();
     const NULL = 'NULL';
-    const query = `UPDATE task SET name="${data.name}", actualStart=${data.actualStart}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progress}, last_modified=${now} WHERE id=${data.id}`;
+    const query = `UPDATE task SET name="${data.name}", leader="${data.leader}", actualStart=${data.actualStart || NULL}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progress}, last_modified=${now} WHERE id=${data.id}`;
     return Queries
         .query(query)
         .then(() => Queries.getLastModifiedTask_(now))
