@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:18889
--- Generation Time: May 06, 2019 at 05:05 AM
+-- Generation Time: Jun 07, 2019 at 06:34 AM
 -- Server version: 5.6.35
 -- PHP Version: 7.0.15
 
@@ -36,8 +36,18 @@ CREATE TABLE `connector` (
 CREATE TABLE `project` (
   `id` int(11) NOT NULL,
   `name` varchar(1024) NOT NULL,
-  `last_modified` bigint(11) NOT NULL
+  `last_modified` bigint(11) NOT NULL,
+  `deleted` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `project`
+--
+
+INSERT INTO `project` (`id`, `name`, `last_modified`, `deleted`) VALUES
+(5, 'Test12345', 1559712844774, 0),
+(8, 'remove', 1559722172410, 1),
+(9, 'qwer', 1559712850006, 1);
 
 -- --------------------------------------------------------
 
@@ -48,7 +58,6 @@ CREATE TABLE `project` (
 CREATE TABLE `task` (
   `id` int(11) NOT NULL,
   `name` varchar(1024) NOT NULL,
-  `leader` varchar(1024) DEFAULT NULL,
   `actualStart` bigint(11) DEFAULT NULL,
   `actualEnd` bigint(11) DEFAULT NULL,
   `baselineStart` bigint(11) DEFAULT NULL,
@@ -56,8 +65,41 @@ CREATE TABLE `task` (
   `progressValue` decimal(10,2) DEFAULT NULL,
   `parent` int(11) DEFAULT NULL,
   `project` int(11) NOT NULL,
+  `last_modified` bigint(20) NOT NULL,
+  `assignee` int(11) DEFAULT NULL,
+  `deleted` tinyint(1) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `task`
+--
+
+INSERT INTO `task` (`id`, `name`, `actualStart`, `actualEnd`, `baselineStart`, `baselineEnd`, `progressValue`, `parent`, `project`, `last_modified`, `assignee`, `deleted`) VALUES
+(43, 'Test1', 1525910400000, 1583452799999, NULL, NULL, '0.30', NULL, 5, 1557122104467, 1, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user`
+--
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `avatar` varchar(1024) DEFAULT NULL,
+  `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `last_modified` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `user`
+--
+
+INSERT INTO `user` (`id`, `name`, `avatar`, `deleted`, `last_modified`) VALUES
+(1, 'Test User', 'https://cdn.shopify.com/s/files/1/0344/6469/products/Hippie_Kitty_Sunglasses_grande.jpg', 0, 1559716061558),
+(2, 'Test User24444', 'https://www.funny-emoticons.com/files/funny-animals/hello-kitty-emoticons/995-shy-kitty.png', 0, 1559715653290),
+(3, 'Test User215', 'https://vignette.wikia.nocookie.net/sanrio-hello-kitty/images/b/b7/Mymelody.jpg', 0, 1559715776099),
+(4, 'one more user1', 'https://www.funny-emoticons.com/files/funny-animals/hello-kitty-emoticons/995-shy-kitty.png', 0, 1559716032503);
 
 --
 -- Indexes for dumped tables
@@ -83,7 +125,14 @@ ALTER TABLE `project`
 ALTER TABLE `task`
   ADD PRIMARY KEY (`id`),
   ADD KEY `parent` (`parent`),
-  ADD KEY `task` (`project`);
+  ADD KEY `task` (`project`),
+  ADD KEY `assignee` (`assignee`);
+
+--
+-- Indexes for table `user`
+--
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -98,12 +147,17 @@ ALTER TABLE `connector`
 -- AUTO_INCREMENT for table `project`
 --
 ALTER TABLE `project`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 --
 -- AUTO_INCREMENT for table `task`
 --
 ALTER TABLE `task`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+--
+-- AUTO_INCREMENT for table `user`
+--
+ALTER TABLE `user`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- Constraints for dumped tables
 --
@@ -120,4 +174,5 @@ ALTER TABLE `connector`
 --
 ALTER TABLE `task`
   ADD CONSTRAINT `task_ibfk_1` FOREIGN KEY (`parent`) REFERENCES `task` (`id`),
-  ADD CONSTRAINT `task_ibfk_2` FOREIGN KEY (`project`) REFERENCES `project` (`id`);
+  ADD CONSTRAINT `task_ibfk_2` FOREIGN KEY (`project`) REFERENCES `project` (`id`),
+  ADD CONSTRAINT `task_ibfk_3` FOREIGN KEY (`assignee`) REFERENCES `user` (`id`);
