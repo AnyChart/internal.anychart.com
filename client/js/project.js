@@ -14,6 +14,8 @@ controller.addEventListener('itemSelect', (e) => {
     const now = Date.now();
     $('#task_actual_start').datepicker('setUTCDate', new Date(e.item.get('actualStart')));
     $('#task_actual_end').datepicker('setUTCDate', new Date(e.item.get('actualEnd')));
+    $('#task_baseline_start').datepicker('setUTCDate', new Date(e.item.get('baselineStart')));
+    $('#task_baseline_end').datepicker('setUTCDate', new Date(e.item.get('baselineEnd')));
     const progress = Math.round(e.item.get('progressValue') * 100);
     $('#task_progress').val(progress);
     $('#progress_label').html(`Прогресс: ${progress}%`);
