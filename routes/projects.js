@@ -7,12 +7,13 @@ const Queries = require(__dirname + '/../db/qureies');
 /**
  * Gets project info by id.
  */
-router.get('/:id', (req, res) => {
+router.get('/:id/:range?', (req, res) => {
     const id = req.params.id;
+    const [min, max] = req.params.range ? req.params.range.split('-') : [NaN, NaN];
 
     Queries.getProjectById(req.params.id)
         .then(projects => {
-            res.render('project.html', { projectId: projects[0].id, projectName: projects[0].name });
+            res.render('project.html', { projectId: projects[0].id, projectName: projects[0].name, min: min, max: max  });
         })
         .catch(err => res.json({
             message: `Could not get project with id=${id}`,

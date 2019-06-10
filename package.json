@@ -1,10 +1,11 @@
 {
-  "name": "ac-gantt-project-editor",
+  "name": "anychart-flow",
   "version": "0.0.1",
-  "description": "Anychart Gantt Project Editor",
+  "description": "Anychart Flow",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "monitor": "nodemon index.js"
   },
   "keywords": [
     "anychart",

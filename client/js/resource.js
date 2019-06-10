@@ -5,17 +5,19 @@ preloader.visible(true);
 
 const controller = new GanttResourceController();
 
-const projectsContainer = $('#current_projects');
-
 anychart.onDocumentReady(() => {
-    fetch(`/resources/get/${projectId}`)
+    fetch(`/tasks/${projectId}`)
         .then(resp => resp.json())
-        .then(data => controller.init(data))
+        .then(tasks => controller.init(tasks))
         .then(() => {
-            $('#task_panel').css('display', 'none');
-            preloader.visible(false);
-        })
-        .catch(err => {
             preloader.visible(false);
         });
 });
+
+function viewProject() {
+    const scale = controller.chart.xScale();
+    const range = scale.getRange();
+    const min = range.min;
+    const max = range.max;
+    window.location.href = `/projects/${projectId}/${min}-${max}`;
+}

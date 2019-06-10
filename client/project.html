@@ -41,7 +41,8 @@
                 class="ac ac-chevron-left"></span> {{ projectName }}</a>
         <div class="btn-group">
             <a class="nav-link" href="#" onclick="viewResource()">View Resource Chart</a>
-            <button class="btn btn-outline-success" type="button" onclick="addTask()" id="add_task_button">Add Task</button>
+            <button class="btn btn-outline-success" type="button" onclick="addTask()" id="add_task_button">Add
+                Task</button>
         </div>
     </nav>
 
@@ -59,22 +60,42 @@
                     </div>
                     <div class="card-body">
                         <!-- NAME -->
-                        <input id="task_name" type="text" class="form-control" placeholder="Task name"
-                            aria-describedby="basic-addon2">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Task name</span>
+                            </div>
+                            <input id="task_name" type="text" class="form-control" placeholder="Task name"
+                                aria-describedby="basic-addon2">
+                        </div>
                         <br />
 
-                        <!-- Leader -->
-                        <!-- <input id="task_leader" type="text" class="form-control" placeholder="Leader"
-                            aria-describedby="basic-addon2"> -->
+                        <!-- TICKET URL -->
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Task URL</span>
+                            </div>
+                            <input id="task_url" type="text" class="form-control" placeholder="Task Ticket URL"
+                                aria-describedby="basic-addon2">
+                        </div>
+                        <br />
 
-                            <select class="form-control" id="assignee">
-                                <option selected>Select Assignee</option>
-                            </select>
+                        <!-- ASSIGNEE -->
+                        <div class="dropdown" id="assignee">
+                            <a id="current_assignee" class="btn btn-outline-secondary dropdown-toggle" href="#"
+                                role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">
+                            </a>
+
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink"></div>
+                        </div>
 
                         <br />
 
                         <!-- ACTUAL START -->
                         <div class="input-group mb-3" id="actual_start_dp">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Acrual Start</span>
+                            </div>
                             <input id="task_actual_start" type="text" class="form-control" placeholder="Actual Start"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
@@ -85,6 +106,9 @@
 
                         <!-- ACTUAL END -->
                         <div class="input-group mb-3" id="actual_end_dp">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Actual End</span>
+                            </div>
                             <input id="task_actual_end" type="text" class="form-control" placeholder="Actual End"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
@@ -95,6 +119,9 @@
 
                         <!-- BASELINE START -->
                         <div class="input-group mb-3" id="baseline_start_dp">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Planned Start</span>
+                            </div>
                             <input id="task_baseline_start" type="text" class="form-control" placeholder="Planned Start"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
@@ -105,6 +132,9 @@
 
                         <!-- BASELINE END -->
                         <div class="input-group mb-3" id="baseline_end_dp">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Planned End</span>
+                            </div>
                             <input id="task_baseline_end" type="text" class="form-control" placeholder="Planned End"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
@@ -146,6 +176,9 @@
 
     <script>
         const projectId = {{ projectId }};
+        const min = {{ min }};
+        const max = {{ max }};
+        
         let addState = 'new'; // Allowed states are 'new', 'edit'.
     </script>
     <script>

@@ -5,7 +5,6 @@ class GanttController extends EventTarget {
     }
 
     init(data, container = 'chart_container') {
-        this.isInitial = !data.length;
         return new Promise((resolve, reject) => {
             anychart.format.outputTimezone((new Date).getTimezoneOffset());
             function boldLabelsOverrider(label, dataItem) {
@@ -22,28 +21,54 @@ class GanttController extends EventTarget {
             this.toolbar.target(this.chart);
 
             const dataGrid = this.chart.dataGrid();
+            dataGrid.edit(true);
+            dataGrid.onEditStart(() => null); //prevents rows editing.
 
-            dataGrid.column(1).labelsOverrider(boldLabelsOverrider)
+            const indexColumn = dataGrid.column(0);
+            indexColumn.labels()
+                .useHtml(true)
+                .format(function() {
+                    const item = this.item;
+                    let rv = String(this.linearIndex);
+                    if (!item.numChildren())
+                        rv += ` <span class="ac ac-trash-o" style="color: red; cursor: pointer" onclick="removeTask(${this.item.get('id')}, '${this.item.get('name')}')"></span>`;
+                    return rv;
+                });
 
-            dataGrid.column(2, {
-                title: "Leader",
-                width: "25%",
-                format: "{%leader}",
-                labelsOverrider: boldLabelsOverrider
-            });
-            dataGrid.column(3, {
-                title: "Progress",
-                width: "25%",
-                format: "{%progress}",
-                labelsOverrider: boldLabelsOverrider
-            });
+            const taskColumn = dataGrid.column(1);
+            taskColumn
+                .title('Task')
+                .labelsOverrider(boldLabelsOverrider)
+                .labels()
+                    .useHtml(true)
+                    .format(function() {
+                        const item = this.item;
+                        const url = item.get('url');
+                        const name = item.get('name');
+                        return url ? `<a href="${url}" target="_blank">${name}</a>` : name;
+                    });
+
+            const assigneeColumn = dataGrid.column(2);
+            assigneeColumn
+                .title('Assignee')
+                .width('25%')
+                .labels()
+                    .useHtml(true)
+                    .format('<img src="{%userAvatar}" style="width: 16px; max-height: 14px;"> {%userName}')
+
+            const progressColumn = dataGrid.column(3);
+            progressColumn
+                .title('%')
+                .width(40)
+                .labelsOverrider(boldLabelsOverrider)
+                .labels()
+                    .format('{%progress}');
 
             this.chart.splitterPosition('30%')
 
-            dataGrid.column(1).title('Task');
+            
             this.chart.xScale().minimumGap(0.2).maximumGap(0.2);
-
-            this.chart.getTimeline().lineMarker(0).value('current').stroke('2 green');
+            this.chart.getTimeline().lineMarker(0).value('current').stroke('3 green');
 
             this.initChartListeners();
             this.initTreeListeners();
@@ -52,15 +77,36 @@ class GanttController extends EventTarget {
             this.chart.container(container);
             this.toolbar.draw();
             this.chart.draw();
-            // this.chart.edit(true);
-            this.chart.fitAll();
+            
+            if (isNaN(+min) || isNaN(+max))
+                this.chart.fitAll();
+            else
+                this.chart.zoomTo(+min, +max);
             //this.chart.zoomTo(now - (3 * 24 * 60 * 60 * 1000), now + (6 * 24 * 60 * 60 * 1000));
             resolve();
         });
     }
 
     initTreeListeners() {
-
+        this.tree.listen('treeItemMove', function(e) {
+            preloader.visible(false);
+            const destination = e.target;
+            const item = e.item;
+            let newParent = destination ? destination.get('id') : null;
+            const taskData = tasksStorage.getData(item.get('id'));
+            taskData.parent = newParent;
+            $.post(
+                '/tasks/update',
+                taskData,
+                (tasks) => {
+                    if (tasks.message) {
+                        console.error(tasks);
+                    } else {
+                        preloader.visible(false);
+                    }
+                }
+            );
+        });
     }
 
     initChartListeners() {

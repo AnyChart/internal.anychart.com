@@ -36,7 +36,7 @@ router.post('/update', (req, res) => {
     Queries.updateTask(req.body)
         .then(newTasks => res.json(newTasks))
         .catch(err => res.json({
-            message: `Could not create task \"${req.body.name}\"`,
+            message: `Could not update task \"${req.body.name}\"`,
             error: err
         }));
 });

@@ -5,17 +5,55 @@ preloader.visible(true);
 
 const controller = new GanttController();
 const usersStorage = new ListStorage();
+const tasksStorage = new ListStorage();
 
 controller.addEventListener('itemSelect', (e) => {
+    const item = controller.selectedItem;
     $('#add_task_button').html('Add subtask');
     $('#task_panel').css('display', 'block');
-    $('#current_task_name').html(`Editing task "${controller.selectedItem.get('name')}"`);
-    $('#task_name').val(e.item.get('name'));
-    $('#task_leader').val(e.item.get('leader'));
+    $('#current_task_name').html(`Editing task "${item.get('name')}"`);
+    $('#task_name').val(item.get('name'));
+    $('#task_url').val(item.get('url'));
+
+    updateSelectedUser(item.get('userId'));
+
     const now = Date.now();
-    $('#task_actual_start').datepicker('setUTCDate', new Date(e.item.get('actualStart')));
-    $('#task_actual_end').datepicker('setUTCDate', new Date(e.item.get('actualEnd')));
-    const progress = Math.round(e.item.get('progressValue') * 100);
+    const actStart = item.get('actualStart');
+    const actEnd = item.get('actualEnd');
+
+    if (actStart) {
+        $('#task_actual_start').datepicker('setUTCDate', new Date(actStart));
+    } else {
+        $('#task_actual_start').datepicker('update', '');
+    }
+
+    if (actEnd) {
+        $('#task_actual_end').datepicker('setUTCDate', new Date(actEnd));
+    } else {
+        $('#task_actual_end').datepicker('update', '');
+    }
+
+    if (item.numChildren()) {
+        $('#actual_start_dp').addClass('d-none');
+        $('#actual_end_dp').addClass('d-none');
+    } else {
+        $('#actual_start_dp').removeClass('d-none');
+        $('#actual_end_dp').removeClass('d-none');
+    }
+
+    const blStart = item.get('baselineStart');
+    const blEnd = item.get('baselineEnd');
+    if (blStart)
+        $('#task_baseline_start').datepicker('setUTCDate', new Date(blStart));
+    else
+        $('#task_baseline_start').datepicker('update', '');
+
+    if (blEnd)
+        $('#task_baseline_end').datepicker('setUTCDate', new Date(blEnd));
+    else
+        $('#task_baseline_end').datepicker('update', '');
+
+    const progress = Math.round(item.get('progressValue') * 100);
     $('#task_progress').val(progress);
     $('#progress_label').html(`Progress: ${progress}%`);
     addState = 'edit';
@@ -30,12 +68,13 @@ controller.addEventListener('itemDeselect', (e) => {
     $('#task_panel').css('display', 'none');
 });
 
-const projectsContainer = $('#current_projects');
-
 anychart.onDocumentReady(() => {
     fetch(`/tasks/${projectId}`)
         .then(resp => resp.json())
-        .then(tasks => controller.init(tasks))
+        .then(tasks => {
+            tasksStorage.sync(tasks);
+            return controller.init(tasks);
+        })
         .then(() => {
             $('#task_panel').css('display', 'none');
             return Promise.resolve();
@@ -44,7 +83,6 @@ anychart.onDocumentReady(() => {
             fetch('/users/data')
                 .then(r => r.json())
                 .then(users => {
-                    console.log(users);
                     usersStorage.sync(users);
                     buildUsersDropdown();
                     return Promise.resolve();
@@ -56,6 +94,7 @@ anychart.onDocumentReady(() => {
 function addTask() {
     $('#task_panel').css('display', 'block');
     addState = 'new';
+    updateSelectedUser(null);
     if (controller.selectedItem) {
         resetTask();
         $('#current_task_name').html(`Adding subtask to "${controller.selectedItem.get('name')}"`);
@@ -64,18 +103,41 @@ function addTask() {
     $('#task_name').focus();
 }
 
+function updateSelectedUser(id = null) {
+    let assigneeAva, assigneeName;
+    if (id == null) {
+        assigneeAva = '/images/banana.png';
+        assigneeName = 'Unassigned';
+    } else {
+        const userInfo = usersStorage.getData(id);
+        assigneeAva = userInfo.avatar;
+        assigneeName = userInfo.name;
+    }
+
+    $('#current_assignee')
+        .attr('data-assignee-id', id)
+        .html(`<img src="${assigneeAva}"  style="width: 60px; max-height: 50px;"> ${assigneeName}`);
+}
+
+function selectUser(e) {
+    const id = $(e.target).attr('data-user-id');
+    updateSelectedUser(id);
+}
+
+
 function buildUsersDropdown() {
     Object
         .values(usersStorage.storage)
         .sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0)
         .forEach(user => {
-            console.log(user);
-            let option = $('<option>');
+            let option = $('<a class="dropdown-item" href="#">');
             option
-                .attr('value', user.id)
                 .attr('id', `assignee-option-${user.id}`)
-                .html(`${user.name}`);
-            $('#assignee').append(option);
+                .attr('data-user-id', user.id)
+                .attr('data-thumbnail', user.avatar)
+                .on('click', selectUser)
+                .html(`<img src="${user.avatar}" style="width: 60px; max-height: 50px;"> ${user.name}`);
+            $('#assignee .dropdown-menu').append(option);
         })
 
 }
@@ -94,7 +156,7 @@ function getParentsToResetChain(item = null, parentsData = { ids: [], items: [] 
 
 function commitTask() {
     const name = $('#task_name').val();
-    const leader = $('#task_leader').val();
+    const url = $('#task_url').val();
     const as = $('#task_actual_start').datepicker('getDate');
     const ae = $('#task_actual_end').datepicker('getDate');
     const bs = $('#task_baseline_start').datepicker('getDate');
@@ -119,19 +181,22 @@ function commitTask() {
     const progress = $('#task_progress').val();
     const parent = controller.selectedItem ? controller.selectedItem.get('id') : null;
     const parentsToReset = getParentsToResetChain(controller.selectedItem);
+    const assignee = $('#current_assignee').attr('data-assignee-id');
 
     const newTaskData = {
         id: parent, //This is used in "edit" mode - edits item by id.
         name: name,
-        leader: leader,
+        url: url,
         actualStart: asUtc,
         actualEnd: aeUtc,
         baselineStart: bsUtc,
         baselineEnd: beUtc,
-        progress: +progress / 100,
+        progressValue: +progress / 100,
         parent: parent,
         project: projectId,
-        parentsToReset: JSON.stringify(parentsToReset.ids)
+        parentsToReset: JSON.stringify(parentsToReset.ids),
+        assignee: assignee,
+        deleted: 0
     };
 
     preloader.visible(true);
@@ -143,19 +208,25 @@ function commitTask() {
                 newTaskData,
                 (tasks) => {
                     if (tasks.message) {
-                        //TODO add exception.
+                        console.error(tasks);
                     } else {
+                        const updatedTask = tasks[0];
+                        tasksStorage.add(updatedTask.id, updatedTask);
+
                         controller.chart.autoRedraw(false);
                         controller.tree.dispatchEvents(false);
                         const editedItem = controller.selectedItem;
 
-                        editedItem.set('name', newTaskData.name);
-                        editedItem.set('leader', newTaskData.leader);
-                        editedItem.set('actualStart', newTaskData.actualStart);
-                        editedItem.set('actualEnd', newTaskData.actualEnd);
-                        editedItem.set('baselineStart', newTaskData.baselineStart);
-                        editedItem.set('baselineStart', newTaskData.baselineStart);
-                        editedItem.set('progressValue', newTaskData.progress);
+                        editedItem.set('name', updatedTask.name);
+                        editedItem.set('url', updatedTask.url);
+                        editedItem.set('actualStart', updatedTask.actualStart);
+                        editedItem.set('actualEnd', updatedTask.actualEnd);
+                        editedItem.set('baselineStart', updatedTask.baselineStart);
+                        editedItem.set('baselineEnd', updatedTask.baselineEnd);
+                        editedItem.set('progressValue', updatedTask.progressValue);
+                        editedItem.set('userId', updatedTask.userId);
+                        editedItem.set('userAvatar', updatedTask.userAvatar);
+                        editedItem.set('userName', updatedTask.userName);
 
                         controller.tree.dispatchEvents(true);
                         controller.chart.autoRedraw(true);
@@ -177,28 +248,21 @@ function commitTask() {
             newTaskData,
             (tasks) => {
                 if (tasks.message) {
-                    //TODO add exception.
+                    console.error(tasks);
                 } else {
-                    // TODO reset parent to autovalues is disabled for a while because of gannt bug,
-                    // controller.chart.autoRedraw(false);
-                    // controller.tree.dispatchEvents(false);
-
-                    // controller.tree.addData(tasks, 'as-table');
-                    // parentsToReset.items.forEach(item => {
-                    //     item.del('actualStart');
-                    //     item.meta('actualStart', null);
-                    //     item.meta('autoStart', null);
-                    //     item.del('actualEnd');
-                    //     item.meta('actualEnd', null);
-                    //     item.meta('autoEnd', null);
-                    //     item.meta('autoProgress', null);
-                    //     item.del('progressValue');
-                    // });
-
-                    // controller.tree.dispatchEvents(true);
-                    // controller.chart.autoRedraw(true);
+                    controller.chart.autoRedraw(false);
+                    controller.tree.dispatchEvents(false);
 
                     controller.tree.addData(tasks, 'as-table');
+                    parentsToReset.items.forEach(item => {
+                        item.del('actualStart');
+                        item.del('actualEnd');
+                        item.del('progressValue');
+                    });
+
+                    controller.tree.dispatchEvents(true);
+                    controller.chart.autoRedraw(true);
+
                     controller.chart.fitAll();
                 }
                 resetTask();
@@ -211,10 +275,14 @@ function commitTask() {
 function resetTask() {
     $('#current_task_name').html('Adding new task');
     $('#task_name').val('');
-    $('#task_leader').val('');
+    $('#task_url').val('');
     // $('#task_actual_start').val('');
     // $('#task_actual_end').val('');
+    updateSelectedUser(null);
     $('#task_progress').val('0');
+    $('#progress_label').html('Progress: 0%');
+    $('#actual_start_dp').removeClass('d-none');
+    $('#actual_end_dp').removeClass('d-none');
     $('#task_actual_start').datepicker('update', '');
     $('#task_actual_end').datepicker('update', '');
     $('#task_baseline_start').datepicker('update', '');
@@ -224,6 +292,28 @@ function resetTask() {
 function closeTask() {
     resetTask();
     $('#task_panel').css('display', 'none');
+}
+
+function removeTask(id, name) {
+    if (confirm(`Do you really want to remove task "${name}"?`)) {
+        preloader.visible(true);
+        const taskData = tasksStorage.getData(id);
+        taskData.deleted = 1;
+        $.post(
+            '/tasks/update',
+            taskData,
+            (tasks) => {
+                if (tasks.message) {
+                    console.error(tasks);
+                } else {
+                    const task = tasks[0];
+                    tasksStorage.del(task.id);
+                    controller.tree.searchItems('id', task.id)[0].remove();
+                }
+                preloader.visible(false);
+            }
+        );
+    }
 }
 
 function changeProgress(val) {

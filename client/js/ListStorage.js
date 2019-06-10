@@ -34,6 +34,6 @@ class ListStorage {
     }
 
     asArray() {
-        this.storage.val
+        // this.storage.val
     }
 }
