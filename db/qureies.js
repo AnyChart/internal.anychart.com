@@ -165,6 +165,17 @@ Queries.getTasksByProjectId = (projectId) => {
 
 
 /**
+ * Gets resources by project id.
+ * @param {number} projectId - Project id.
+ * @returns {Promise}
+ */
+Queries.getResourcesByProjectId = (projectId) => {
+    return Queries
+        .query(`SELECT * FROM task WHERE project=${projectId}`)
+        .then(tasks => Queries.task2resource(tasks));
+}
+
+/**
  * Gets just inserted task.
  * @param {number} date - Modified date.
  * @private
