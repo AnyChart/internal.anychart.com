@@ -110,7 +110,6 @@ class GanttResourceController extends EventTarget {
     }
 
     initChartListeners() {
-
     }
 
 
