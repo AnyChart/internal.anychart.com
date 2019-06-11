@@ -25,14 +25,21 @@ class GanttController extends EventTarget {
             dataGrid.onEditStart(() => null); //prevents rows editing.
 
             const indexColumn = dataGrid.column(0);
+            const rowIndexTemplate = '<span class="ac ac-trash-o" style="color: {color}; cursor: pointer" onclick="removeTask({id}, \'{name}\')"></span>&nbsp;{index}';
             indexColumn.labels()
                 .useHtml(true)
                 .format(function() {
                     const item = this.item;
-                    let rv = String(this.linearIndex);
-                    if (!item.numChildren())
-                        rv += ` <span class="ac ac-trash-o" style="color: red; cursor: pointer" onclick="removeTask(${this.item.get('id')}, '${this.item.get('name')}')"></span>`;
-                    return rv;
+                    let params = {color:'red', id: this.item.get('id'), name: this.item.get('name')};
+                    if (item.numChildren()){
+                        params.color = 'gray';
+                        params.id = 'x';
+                    }
+                    return rowIndexTemplate
+                            .replace('{index}', String(this.linearIndex))
+                            .replace('{color}', params.color)
+                            .replace('{id}', params.id)
+                            .replace('{name}', params.name);
                 });
 
             const taskColumn = dataGrid.column(1);

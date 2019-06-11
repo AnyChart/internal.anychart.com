@@ -30,7 +30,7 @@ anychart.onDocumentReady(() => {
 
 function addUser(user) {
     return $(`<div class="media text-muted pt-3" id="user-info-${user.id}">
-                <img class="mr-3" id="ac-user-ava-${user.id}" src="${user.avatar}" alt="Ava for ${user.name}" style="width: 60px; max-height: 50px;">
+                <img class="mr-3 user-image" id="ac-user-ava-${user.id}" src="${user.avatar}" alt="Ava for ${user.name}">
                     <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
                         <div class="d-flex justify-content-between align-items-center w-100">
                             <strong class="text-gray-dark">

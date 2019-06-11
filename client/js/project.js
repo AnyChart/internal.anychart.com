@@ -116,7 +116,7 @@ function updateSelectedUser(id = null) {
 
     $('#current_assignee')
         .attr('data-assignee-id', id)
-        .html(`<img src="${assigneeAva}"  style="width: 60px; max-height: 50px;"> ${assigneeName}`);
+        .html(`<img src="${assigneeAva}"  class="user-image"> ${assigneeName}`);
 }
 
 function selectUser(e) {
@@ -136,7 +136,7 @@ function buildUsersDropdown() {
                 .attr('data-user-id', user.id)
                 .attr('data-thumbnail', user.avatar)
                 .on('click', selectUser)
-                .html(`<img src="${user.avatar}" style="width: 60px; max-height: 50px;"> ${user.name}`);
+                .html(`<img src="${user.avatar}" class="user-image"> ${user.name}`);
             $('#assignee .dropdown-menu').append(option);
         })
 
