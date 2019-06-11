@@ -5,6 +5,7 @@ class GanttController extends EventTarget {
     }
 
     init(data, container = 'chart_container') {
+        console.log(data);
         return new Promise((resolve, reject) => {
             anychart.format.outputTimezone((new Date).getTimezoneOffset());
             function boldLabelsOverrider(label, dataItem) {
@@ -61,7 +62,7 @@ class GanttController extends EventTarget {
                 .width('25%')
                 .labels()
                     .useHtml(true)
-                    .format('<img src="{%userAvatar}" style="width: 16px; max-height: 14px;"> {%userName}')
+                    .format('<img src="{%userAvatar}" style="width: 16px; height: 16px"> {%userName}')
 
             const progressColumn = dataGrid.column(3);
             progressColumn
