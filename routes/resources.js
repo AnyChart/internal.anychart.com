@@ -21,16 +21,6 @@ router.get('/:id/:range?', (req, res) => {
         }));
 });
 
-router.get('/get/:projectId', (req, res) => {
-    const projectId = req.params.projectId;
-    Queries.getResourcesByProjectId(projectId)
-        .then(data => res.json(data))
-        .catch(err => res.json({
-            message: `Could not get tasks for project with id=${projectId}`,
-            error: err
-        }));
-});
-
 
 /**
  * Returns all projects info.

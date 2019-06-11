@@ -31,28 +31,6 @@ app.use('/tasks', tasks);
 app.use('/users', users);
 app.use('/resources', resources);
 
-// app.get('/r/:id', (req, res) => {
-//     const id = req.params.id;
-//     Queries.getProjectById(req.params.id)
-//         .then(projects => {
-//             res.render('resource.html', { projectId: projects[0].id, projectName: projects[0].name });
-//         })
-//         .catch(err => res.json({
-//             message: `Could not get project with id=${id} ${err}`,
-//             error: err
-//         }));
-// });
-
-// app.get('/resources/:projectId', (req, res) => {
-//     const projectId = req.params.projectId;
-//     Queries.getResourcesByProjectId(projectId)
-//         .then(data => res.json(data))
-//         .catch(err => res.json({
-//             message: `Could not get tasks for project with id=${projectId}`,
-//             error: err
-//         }));
-// });
-
 app.listen(config.port, () => {
     console.log(`Anychart Gantt Project Editor server started! Listening port ${config.port}.`);
 });
