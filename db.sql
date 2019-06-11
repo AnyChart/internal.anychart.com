@@ -41,17 +41,6 @@ CREATE TABLE `project` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `project`
---
-
-INSERT INTO `project` (`id`, `name`, `last_modified`, `deleted`) VALUES
-(5, 'Test12345', 1559712844774, 0),
-(8, 'remove', 1559722172410, 1),
-(9, 'qwer', 1559712850006, 1);
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `task`
 --
 
@@ -72,18 +61,6 @@ CREATE TABLE `task` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `task`
---
-
-INSERT INTO `task` (`id`, `name`, `actualStart`, `actualEnd`, `baselineStart`, `baselineEnd`, `progressValue`, `parent`, `project`, `last_modified`, `assignee`, `deleted`, `url`) VALUES
-(58, 'Group', NULL, NULL, NULL, NULL, NULL, NULL, 5, 1560157482204, NULL, 0, NULL),
-(59, 'Sub1', 1559347200000, 1559606399999, 1559433600000, 1560124799999, '0.30', 58, 5, 1560157511742, 1, 0, NULL),
-(60, 'Sub2', 1560211200000, 1560556799999, NULL, NULL, '0.40', 58, 5, 1560157691935, 1, 0, NULL),
-(61, 'Sub3', 1559606400000, 1560556799999, NULL, NULL, '0.40', 58, 5, 1560157731464, 4, 0, NULL);
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `user`
 --
 
@@ -94,21 +71,6 @@ CREATE TABLE `user` (
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `last_modified` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `user`
---
-
-INSERT INTO `user` (`id`, `name`, `avatar`, `deleted`, `last_modified`) VALUES
-(1, 'Test User', 'https://cdn.shopify.com/s/files/1/0344/6469/products/Hippie_Kitty_Sunglasses_grande.jpg', 0, 1559716061558),
-(2, 'Test User24444', '/images/banana.png', 0, 1559715653290),
-(3, 'Test User215', 'https://vignette.wikia.nocookie.net/sanrio-hello-kitty/images/b/b7/Mymelody.jpg', 0, 1559715776099),
-(4, 'one more user1', 'https://www.funny-emoticons.com/files/funny-animals/hello-kitty-emoticons/995-shy-kitty.png', 0, 1559716032503),
-(7, 'empty', '/images/banana.png', 0, 1559890586169);
-
---
--- Indexes for dumped tables
---
 
 --
 -- Indexes for table `connector`
