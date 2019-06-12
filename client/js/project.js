@@ -19,46 +19,6 @@ controller.addEventListener('itemSelect', (e) => {
     updateSelectedUser(item.get('userId'));
     dpController.syncFromItem(item);
 
-    // const now = Date.now();
-    // const actStart = item.get('actualStart');
-    // const actEnd = item.get('actualEnd');
-
-    // if (actStart) {
-    //     $('#task_actual_start').datepicker('setUTCDate', new Date(actStart));
-    // } else {
-    //     $('#task_actual_start').datepicker('update', '');
-    // }
-
-    // if (actEnd) {
-    //     $('#task_actual_end').datepicker('setUTCDate', new Date(actEnd));
-    // } else {
-    //     $('#task_actual_end').datepicker('update', '');
-    // }
-
-    // if (item.numChildren()) {
-    //     $('#actual_start_dp').addClass('d-none');
-    //     $('#actual_end_dp').addClass('d-none');
-    // } else {
-    //     $('#actual_start_dp').removeClass('d-none');
-    //     $('#actual_end_dp').removeClass('d-none');
-    // }
-
-    // const date = new Date();
-    // const offset = date.getTimezoneOffset() * 60000;
-    // const blStart = item.get('baselineStart');
-    // const blEnd = item.get('baselineEnd');
-
-    // if (blStart)
-    //     $('#task_baseline_start').datepicker('setUTCDate', new Date(blStart - offset));
-    // else
-    //     $('#task_baseline_start').datepicker('update', '');
-
-    // if (blEnd) {
-    //     $('#task_baseline_end').datepicker('setUTCDate', new Date(blEnd - offset));
-    // }
-    // else
-    //     $('#task_baseline_end').datepicker('update', '');
-
     const progress = Math.round(item.get('progressValue') * 100);
     $('#task_progress').val(progress);
     $('#progress_label').html(`Progress: ${progress}%`);
@@ -123,7 +83,7 @@ function updateSelectedUser(id = null) {
 
     $('#current_assignee')
         .attr('data-assignee-id', id)
-        .html(`<img src="${assigneeAva}"  style="width: 60px; max-height: 50px;"> ${assigneeName}`);
+        .html(`<img src="${assigneeAva}"  class="user-image"> ${assigneeName}`);
 }
 
 function selectUser(e) {
@@ -143,7 +103,7 @@ function buildUsersDropdown() {
                 .attr('data-user-id', user.id)
                 .attr('data-thumbnail', user.avatar)
                 .on('click', selectUser)
-                .html(`<img src="${user.avatar}" style="width: 60px; max-height: 50px;"> ${user.name}`);
+                .html(`<img src="${user.avatar}" class="user-image"> ${user.name}`);
             $('#assignee .dropdown-menu').append(option);
         })
 
@@ -272,8 +232,7 @@ function resetTask() {
     $('#current_task_name').html('Adding new task');
     $('#task_name').val('');
     $('#task_url').val('');
-    // $('#task_actual_start').val('');
-    // $('#task_actual_end').val('');
+    
     updateSelectedUser(null);
     $('#task_progress').val('0');
     $('#progress_label').html('Progress: 0%');
