@@ -124,5 +124,12 @@ class GanttController extends EventTarget {
         });
     }
 
+    reset() {
+        if (this.selectedItem) {
+            this.selectedItem.meta('selected', false);
+            this.selectedItem = null;
+        }
+    }
+
 
 }

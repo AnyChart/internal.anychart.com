@@ -6,6 +6,7 @@ preloader.visible(true);
 const controller = new GanttController();
 const usersStorage = new ListStorage();
 const tasksStorage = new ListStorage();
+const dpController = new DateTimePickerController();
 
 controller.addEventListener('itemSelect', (e) => {
     const item = controller.selectedItem;
@@ -16,42 +17,47 @@ controller.addEventListener('itemSelect', (e) => {
     $('#task_url').val(item.get('url'));
 
     updateSelectedUser(item.get('userId'));
+    dpController.syncFromItem(item);
 
-    const now = Date.now();
-    const actStart = item.get('actualStart');
-    const actEnd = item.get('actualEnd');
+    // const now = Date.now();
+    // const actStart = item.get('actualStart');
+    // const actEnd = item.get('actualEnd');
 
-    if (actStart) {
-        $('#task_actual_start').datepicker('setUTCDate', new Date(actStart));
-    } else {
-        $('#task_actual_start').datepicker('update', '');
-    }
+    // if (actStart) {
+    //     $('#task_actual_start').datepicker('setUTCDate', new Date(actStart));
+    // } else {
+    //     $('#task_actual_start').datepicker('update', '');
+    // }
 
-    if (actEnd) {
-        $('#task_actual_end').datepicker('setUTCDate', new Date(actEnd));
-    } else {
-        $('#task_actual_end').datepicker('update', '');
-    }
+    // if (actEnd) {
+    //     $('#task_actual_end').datepicker('setUTCDate', new Date(actEnd));
+    // } else {
+    //     $('#task_actual_end').datepicker('update', '');
+    // }
 
-    if (item.numChildren()) {
-        $('#actual_start_dp').addClass('d-none');
-        $('#actual_end_dp').addClass('d-none');
-    } else {
-        $('#actual_start_dp').removeClass('d-none');
-        $('#actual_end_dp').removeClass('d-none');
-    }
+    // if (item.numChildren()) {
+    //     $('#actual_start_dp').addClass('d-none');
+    //     $('#actual_end_dp').addClass('d-none');
+    // } else {
+    //     $('#actual_start_dp').removeClass('d-none');
+    //     $('#actual_end_dp').removeClass('d-none');
+    // }
 
-    const blStart = item.get('baselineStart');
-    const blEnd = item.get('baselineEnd');
-    if (blStart)
-        $('#task_baseline_start').datepicker('setUTCDate', new Date(blStart));
-    else
-        $('#task_baseline_start').datepicker('update', '');
+    // const date = new Date();
+    // const offset = date.getTimezoneOffset() * 60000;
+    // const blStart = item.get('baselineStart');
+    // const blEnd = item.get('baselineEnd');
 
-    if (blEnd)
-        $('#task_baseline_end').datepicker('setUTCDate', new Date(blEnd));
-    else
-        $('#task_baseline_end').datepicker('update', '');
+    // if (blStart)
+    //     $('#task_baseline_start').datepicker('setUTCDate', new Date(blStart - offset));
+    // else
+    //     $('#task_baseline_start').datepicker('update', '');
+
+    // if (blEnd) {
+    //     $('#task_baseline_end').datepicker('setUTCDate', new Date(blEnd - offset));
+    // }
+    // else
+    //     $('#task_baseline_end').datepicker('update', '');
 
     const progress = Math.round(item.get('progressValue') * 100);
     $('#task_progress').val(progress);
@@ -69,6 +75,7 @@ controller.addEventListener('itemDeselect', (e) => {
 });
 
 anychart.onDocumentReady(() => {
+    dpController.init();
     fetch(`/tasks/${projectId}`)
         .then(resp => resp.json())
         .then(tasks => {
@@ -157,42 +164,28 @@ function getParentsToResetChain(item = null, parentsData = { ids: [], items: [] 
 function commitTask() {
     const name = $('#task_name').val();
     const url = $('#task_url').val();
-    const as = $('#task_actual_start').datepicker('getDate');
-    const ae = $('#task_actual_end').datepicker('getDate');
-    const bs = $('#task_baseline_start').datepicker('getDate');
-    const be = $('#task_baseline_end').datepicker('getDate');
 
-    let asUtc = null;
-    if (as)
-        asUtc = as.getTime() - as.getTimezoneOffset() * 60000;
-
-    let aeUtc = null;
-    if (ae)
-        aeUtc = ae.getTime() - ae.getTimezoneOffset() * 60000 + (24 * 60 * 60 * 1000 - 1);
-
-    let bsUtc = null;
-    if (bs)
-        bsUtc = bs.getTime() - bs.getTimezoneOffset() * 60000;
-
-    let beUtc = null;
-    if (be)
-        beUtc = be.getTime() - be.getTimezoneOffset() * 60000 + (24 * 60 * 60 * 1000 - 1);
+    const currentItem = addState == 'edit' ? controller.selectedItem : null;
+    const dates = dpController.getDates(currentItem);
 
     const progress = $('#task_progress').val();
-    const parent = controller.selectedItem ? controller.selectedItem.get('id') : null;
-    const parentsToReset = getParentsToResetChain(controller.selectedItem);
+    const parent = addState == 'edit' ?
+        (controller.selectedItem ? controller.selectedItem.getParent() : null) :
+        controller.selectedItem;
+
+    const parentsToReset = getParentsToResetChain(parent);
     const assignee = $('#current_assignee').attr('data-assignee-id');
 
     const newTaskData = {
-        id: parent, //This is used in "edit" mode - edits item by id.
+        id: addState == 'edit' ? controller.selectedItem.get('id') : null, //This is used in "edit" mode - edits item by id.
         name: name,
         url: url,
-        actualStart: asUtc,
-        actualEnd: aeUtc,
-        baselineStart: bsUtc,
-        baselineEnd: beUtc,
+        actualStart: dates[0],
+        actualEnd: dates[1],
+        baselineStart: dates[2],
+        baselineEnd: dates[3],
         progressValue: +progress / 100,
-        parent: parent,
+        parent: parent ? parent.get('id') : null,
         project: projectId,
         parentsToReset: JSON.stringify(parentsToReset.ids),
         assignee: assignee,
@@ -201,7 +194,7 @@ function commitTask() {
 
     preloader.visible(true);
     if (addState == 'edit') {
-        if (controller.selectedItem) {
+        if (currentItem) {
             // updating existing task.
             $.post(
                 '/tasks/update',
@@ -215,32 +208,31 @@ function commitTask() {
 
                         controller.chart.autoRedraw(false);
                         controller.tree.dispatchEvents(false);
-                        const editedItem = controller.selectedItem;
 
-                        editedItem.set('name', updatedTask.name);
-                        editedItem.set('url', updatedTask.url);
-                        editedItem.set('actualStart', updatedTask.actualStart);
-                        editedItem.set('actualEnd', updatedTask.actualEnd);
-                        editedItem.set('baselineStart', updatedTask.baselineStart);
-                        editedItem.set('baselineEnd', updatedTask.baselineEnd);
-                        editedItem.set('progressValue', updatedTask.progressValue);
-                        editedItem.set('userId', updatedTask.userId);
-                        editedItem.set('userAvatar', updatedTask.userAvatar);
-                        editedItem.set('userName', updatedTask.userName);
+                        currentItem.set('name', updatedTask.name);
+                        currentItem.set('url', updatedTask.url);
+                        currentItem.set('actualStart', updatedTask.actualStart);
+                        currentItem.set('actualEnd', updatedTask.actualEnd);
+                        currentItem.set('baselineStart', updatedTask.baselineStart);
+                        currentItem.set('baselineEnd', updatedTask.baselineEnd);
+                        currentItem.set('progressValue', updatedTask.progressValue);
+                        currentItem.set('userId', updatedTask.userId);
+                        currentItem.set('userAvatar', updatedTask.userAvatar);
+                        currentItem.set('userName', updatedTask.userName);
+
+                        dpController.syncFromItem(currentItem);
 
                         controller.tree.dispatchEvents(true);
                         controller.chart.autoRedraw(true);
                         controller.chart.fitAll();
                     }
-                    resetTask();
                     preloader.visible(false);
                 }
             );
-
         } else {
             alert('Pretty bad bug is found! Debug it!');
+            preloader.visible(false);
         }
-        preloader.visible(false);
     } else {
         // Adding new task.
         $.post(
@@ -250,6 +242,9 @@ function commitTask() {
                 if (tasks.message) {
                     console.error(tasks);
                 } else {
+                    const newTask = tasks[0];
+                    tasksStorage.add(newTask.id, newTask);
+
                     controller.chart.autoRedraw(false);
                     controller.tree.dispatchEvents(false);
 
@@ -265,7 +260,8 @@ function commitTask() {
 
                     controller.chart.fitAll();
                 }
-                resetTask();
+                // closeTask();
+                // controller.reset();
                 preloader.visible(false);
             }
         );
@@ -281,12 +277,8 @@ function resetTask() {
     updateSelectedUser(null);
     $('#task_progress').val('0');
     $('#progress_label').html('Progress: 0%');
-    $('#actual_start_dp').removeClass('d-none');
-    $('#actual_end_dp').removeClass('d-none');
-    $('#task_actual_start').datepicker('update', '');
-    $('#task_actual_end').datepicker('update', '');
-    $('#task_baseline_start').datepicker('update', '');
-    $('#task_baseline_end').datepicker('update', '');
+
+    dpController.reset();
 }
 
 function closeTask() {
@@ -317,7 +309,7 @@ function removeTask(id, name) {
 }
 
 function changeProgress(val) {
-    $('#progress_label').html(`Progress: ${val}%`);
+    $('#progress_label').html(`Progress: ${val || 0}%`);
 }
 
 function viewResource() {
