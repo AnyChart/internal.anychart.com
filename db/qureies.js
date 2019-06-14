@@ -155,7 +155,7 @@ Queries.getTasksByProjectId = (projectId) => {
             WHERE task.project=${projectId} AND task.assignee=user.id AND task.deleted=0`);
 
     const notAssignedTasksQuery = Queries.query(
-        `SELECT * FROM task WHERE task.project=${projectId} AND task.assignee IS NULL`
+        `SELECT * FROM task WHERE task.project=${projectId} AND task.assignee IS NULL AND task.deleted=0`
     );
                                 
     return Promise
@@ -171,7 +171,7 @@ Queries.getTasksByProjectId = (projectId) => {
  */
 Queries.getResourcesByProjectId = (projectId) => {
     return Queries
-        .query(`SELECT * FROM task WHERE project=${projectId}`)
+        .query(`SELECT * FROM task WHERE project=${projectId} AND task.deleted=0`)
         .then(tasks => Queries.task2resource(tasks));
 }
 
@@ -187,7 +187,7 @@ Queries.getLastModifiedTask_ = (date) => {
                    FROM task, user 
                    WHERE task.last_modified=${date} AND task.assignee=user.id LIMIT 1`;
 
-    const notAssignedTasksQuery = `SELECT * FROM task where last_modified=${date} LIMIT 1`;
+    const notAssignedTasksQuery = `SELECT * FROM task WHERE last_modified=${date} LIMIT 1`;
 
     return Queries
         .query(assignedTaskQuery)
@@ -232,7 +232,7 @@ Queries.updateTask = (data) => {
     const now = Date.now();
     const url = data.url ? `"${data.url}"` : NULL;
     const query = `UPDATE task
-        SET name="${data.name}", parent=${data.parent}, url=${url}, assignee=${data.assignee || NULL}, actualStart=${data.actualStart || NULL}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progressValue || NULL}, last_modified=${now}, deleted=${data.deleted} WHERE id=${data.id}`;
+        SET name="${data.name}", parent=${data.parent || NULL}, url=${url}, assignee=${data.assignee || NULL}, actualStart=${data.actualStart || NULL}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progressValue || NULL}, last_modified=${now}, deleted=${data.deleted} WHERE id=${data.id}`;
     return Queries
         .query(query)
         .then(() => Queries.getLastModifiedTask_(now))
