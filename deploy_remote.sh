@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
+BRANCH=$1
+
+if [ -z ${BRANCH} ]; then
+    echo '``./deploy BRANCH-NAME` expected' && exit 1
+fi
+
 {
     echo "GIT update"
-    ssh gituser@anychart.stg "cd internal.anychart.stg && git pull origin master && npm install"
+    ssh gituser@anychart.stg "cd internal.anychart.stg && git pull origin ${BRANCH} && npm install"
 } || {
     exit 1
 }
