@@ -223,7 +223,7 @@ function commitTask() {
                         editedItem.set('actualEnd', updatedTask.actualEnd);
                         editedItem.set('baselineStart', updatedTask.baselineStart);
                         editedItem.set('baselineEnd', updatedTask.baselineEnd);
-                        editedItem.set('progressValue', updatedTask.progressValue);
+                        editedItem.set('progressValue', updatedTask.progressValue || null);
                         editedItem.set('userId', updatedTask.userId);
                         editedItem.set('userAvatar', updatedTask.userAvatar);
                         editedItem.set('userName', updatedTask.userName);

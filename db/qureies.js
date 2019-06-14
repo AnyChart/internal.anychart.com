@@ -219,7 +219,7 @@ Queries.createTask = (data) => {
     const url = data.url ? `"${data.url}"` : NULL;
     const query = `INSERT INTO
         task (id, name, url, assignee, actualStart, actualEnd, baselineStart, baselineEnd, progressValue, parent, project, last_modified)
-        VALUES (NULL, "${data.name}", ${url}, ${data.assignee || NULL}, ${data.actualStart || NULL}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progressValue}, ${data.parent || NULL}, ${data.project}, ${now})`;
+        VALUES (NULL, "${data.name}", ${url}, ${data.assignee || NULL}, ${data.actualStart || NULL}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progressValue || NULL}, ${data.parent || NULL}, ${data.project}, ${now})`;
     return Queries
         .resetParents_(data.parentsToReset)
         .then(() => Queries.query(query))    
@@ -232,7 +232,7 @@ Queries.updateTask = (data) => {
     const now = Date.now();
     const url = data.url ? `"${data.url}"` : NULL;
     const query = `UPDATE task
-        SET name="${data.name}", parent=${data.parent}, url=${url}, assignee=${data.assignee || NULL}, actualStart=${data.actualStart || NULL}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progressValue}, last_modified=${now}, deleted=${data.deleted} WHERE id=${data.id}`;
+        SET name="${data.name}", parent=${data.parent}, url=${url}, assignee=${data.assignee || NULL}, actualStart=${data.actualStart || NULL}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progressValue || NULL}, last_modified=${now}, deleted=${data.deleted} WHERE id=${data.id}`;
     return Queries
         .query(query)
         .then(() => Queries.getLastModifiedTask_(now))
