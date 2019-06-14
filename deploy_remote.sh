@@ -7,7 +7,7 @@ fi
 
 {
     echo "GIT update"
-    ssh gituser@anychart.stg "cd internal.anychart.stg && git pull origin ${BRANCH} && npm install"
+    ssh gituser@anychart.stg "cd internal.anychart.stg && git clean -df && git checkout -- . && git pull origin ${BRANCH} && npm install"
 } || {
     exit 1
 }
