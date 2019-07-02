@@ -38,26 +38,30 @@ function parse_config_file(){
     done
 }
 
-CONFIG_FILE=./config.local.js
-if [ ! -f "${CONFIG_FILE}" ]; then
-    CONFIG_FILE=./config.js
-fi
+function readConfig(){
+    CONFIG_FILE=./config.local.js
+    if [ ! -f "${CONFIG_FILE}" ]; then
+        CONFIG_FILE=./config.js
+    fi
 
-run "parse_config_file < ${CONFIG_FILE}"
+    run "parse_config_file < ${CONFIG_FILE}"
 
-echo "DB_USER: ${DB_USER}"
-echo "DB_PASS: ${DB_PASS}"
-echo "DB_NAME: ${DB_NAME}"
+    echo "DB_USER: ${DB_USER}"
+    echo "DB_PASS: ${DB_PASS}"
+    echo "DB_NAME: ${DB_NAME}"
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    MYSQL_prefix="/Applications/MAMP/Library/bin/"
-fi
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        MYSQL_prefix="/Applications/MAMP/Library/bin/"
+    fi
+}
 
 case $1 in
     make)
+        readConfig
         run "${MYSQL_prefix}mysqldump -u ${DB_USER} -p${DB_PASS} ${DB_NAME} > ./dump.sql"
     ;;
     restore)
+        readConfig
         run "${MYSQL_prefix}mysql -u ${DB_USER} -p${DB_PASS} ${DB_NAME} < ./dump.sql"
     ;;
     *)

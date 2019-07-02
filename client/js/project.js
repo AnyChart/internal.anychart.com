@@ -15,6 +15,7 @@ controller.addEventListener('itemSelect', (e) => {
     $('#current_task_name').html(`Editing task "${item.get('name')}"`);
     $('#task_name').val(item.get('name'));
     $('#task_url').val(item.get('url'));
+    $('#task_priority').val(item.get('priority'));
 
     updateSelectedUser(item.get('userId'));
     dpController.syncFromItem(item);
@@ -124,6 +125,7 @@ function getParentsToResetChain(item = null, parentsData = { ids: [], items: [] 
 function commitTask() {
     const name = $('#task_name').val();
     const url = $('#task_url').val();
+    const priority = $('#task_priority').val();
 
     const currentItem = addState == 'edit' ? controller.selectedItem : null;
     const dates = dpController.getDates(currentItem);
@@ -140,6 +142,7 @@ function commitTask() {
         id: addState == 'edit' ? controller.selectedItem.get('id') : null, //This is used in "edit" mode - edits item by id.
         name: name,
         url: url,
+        priority: priority,
         actualStart: dates[0],
         actualEnd: dates[1],
         baselineStart: dates[2],
@@ -164,6 +167,7 @@ function commitTask() {
                         console.error(tasks);
                     } else {
                         const updatedTask = tasks[0];
+                        
                         tasksStorage.add(updatedTask.id, updatedTask);
 
                         controller.chart.autoRedraw(false);
@@ -171,6 +175,7 @@ function commitTask() {
 
                         currentItem.set('name', updatedTask.name);
                         currentItem.set('url', updatedTask.url);
+                        currentItem.set('priority', updatedTask.priority);
                         currentItem.set('actualStart', updatedTask.actualStart);
                         currentItem.set('actualEnd', updatedTask.actualEnd);
                         currentItem.set('baselineStart', updatedTask.baselineStart);
@@ -232,6 +237,7 @@ function resetTask() {
     $('#current_task_name').html('Adding new task');
     $('#task_name').val('');
     $('#task_url').val('');
+    $('#task_priority').val('');
     
     updateSelectedUser(null);
     $('#task_progress').val('0');

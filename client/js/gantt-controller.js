@@ -29,6 +29,7 @@ class GanttController extends EventTarget {
             const rowIndexTemplate = '<span class="ac ac-trash-o" style="color: {color}; cursor: pointer" onclick="removeTask({id}, \'{name}\')"></span>&nbsp;{index}';
             indexColumn.labels()
                 .useHtml(true)
+                .width(35)
                 .format(function() {
                     const item = this.item;
                     let params = {color:'red', id: this.item.get('id'), name: this.item.get('name')};
@@ -41,30 +42,64 @@ class GanttController extends EventTarget {
                             .replace('{color}', params.color)
                             .replace('{id}', params.id)
                             .replace('{name}', params.name);
-                });
+                });            
 
-            const taskColumn = dataGrid.column(1);
-            taskColumn
-                .title('Task')
-                .labelsOverrider(boldLabelsOverrider)
+            const priorityColumn = dataGrid.column(1);
+            priorityColumn
+                .title('')
+                .width(30)
+                .collapseExpandButtons(false)
+                .depthPaddingMultiplier(5)
                 .labels()
                     .useHtml(true)
                     .format(function() {
                         const item = this.item;
-                        const url = item.get('url');
-                        const name = item.get('name');
-                        return url ? `<a href="${url}" target="_blank">${name}</a>` : name;
+                        let clc=item.get('priority');
+                        switch(clc){
+                            case '?':
+                                clc="qst";
+                                break;
+                            case 'x':
+                                clc="drop";
+                                break;
+                        }
+                        return `<i class="prio prio-${clc}">${clc || ''}</i>`;
                     });
 
-            const assigneeColumn = dataGrid.column(2);
+            const taskColumn = dataGrid.column(2);
+            taskColumn
+                .title('Task')
+                .width(200)
+                .labelsOverrider(boldLabelsOverrider)
+                .depthPaddingMultiplier(20)
+                .collapseExpandButtons(true)
+                .labels().format('{%name}');
+            const urlColumn = dataGrid.column(3);
+            urlColumn
+                .title('URL')
+                .width(70)
+                .labels()
+                    .useHtml(true)
+                    .fontSize(10)
+                    .format(function() {
+                        const item = this.item;
+                        let name = item.get('url') || '';
+                        let url = item.get('url') || '';
+                        if (name && ['dv','ts','en'].includes(name.substr(0,2).toLowerCase())){
+                            url = 'https://anychart.atlassian.net/browse/'+url;
+                        }
+                        return `<a href="${url}" target="_blank">${name}</a>`;
+                    });
+
+            const assigneeColumn = dataGrid.column(4);
             assigneeColumn
                 .title('Assignee')
-                .width('25%')
+                .width(100)
                 .labels()
                     .useHtml(true)
                     .format('<img src="{%userAvatar}" style="width: 16px; height: 16px"> {%userName}')
 
-            const progressColumn = dataGrid.column(3);
+            const progressColumn = dataGrid.column(5);
             progressColumn
                 .title('%')
                 .width(40)
@@ -72,9 +107,8 @@ class GanttController extends EventTarget {
                 .labels()
                     .format('{%progress}');
 
-            this.chart.splitterPosition('30%')
+            this.chart.splitterPosition(500);
 
-            
             this.chart.xScale().minimumGap(0.2).maximumGap(0.2);
             this.chart.getTimeline().lineMarker(0).value('current').stroke('3 green');
 

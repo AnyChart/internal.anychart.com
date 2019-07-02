@@ -31,8 +31,13 @@
             padding: 0;
         }
 
+        .input-group-prepend {
+            width: 120px;
+            text-align: right;
+        }
         .input-group-text {
-            width: 100px
+            width: 100%;
+            text-align: right;
         }
 
         .user-image {
@@ -40,6 +45,23 @@
             height: 32px;
             border-radius:16px;
         }
+
+        .prio{
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+        }
+        .prio-1{color:rgb(255, 0, 0)}
+        .prio-2{color: #eb2121cc}
+        .prio-3{color: #f79311}
+        .prio-4{color: #faea0f}
+        .prio-5{color: #ece927ad}
+        .prio-6{color: #d0ff00bb}
+        .prio-7{color: #d0ff00}
+        .prio-8{color: #7d9c4350}
+        .prio-9{color: #3d262627}
+        .prio-qst{color:deepskyblue}
+        .prio-drop{color:darkgray}
     </style>
 
 
@@ -56,14 +78,14 @@
         </div>
     </nav>
 
-    <div class="container-fluid" style="height: 100%; max-height: 600px">
+    <div class="container-fluid" style="height: 1000px">
         <div class="row">
             <div class="col">
                 <div class="card">
                     <div class="card-body" id="chart_container"></div>
                 </div>
             </div>
-            <div class="col-3" id="task_panel" style="display: none">
+            <div class="col-4" id="task_panel" style="display: none">
                 <div class="card">
                     <div class="card-header">
                         <span class="nav-link" id="current_task_name">Adding new task</span>
@@ -87,8 +109,32 @@
                                 aria-describedby="basic-addon2">
                         </div>
 
+                        <!-- Priority -->
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Priority</span>
+                            </div>
+                            <select id="task_priority" class="form-control">
+                                <option></option>
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                                <option>7</option>
+                                <option>8</option>
+                                <option>9</option>
+                                <option>?</option>
+                                <option>X</option>
+                            </select>
+                        </div>
+
                         <!-- ASSIGNEE -->
-                        <div class="dropdown" id="assignee">
+                        <div class="dropdown input-group mb-3" id="assignee">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Assignee</span>
+                            </div>
                             <a id="current_assignee" class="btn btn-outline-secondary dropdown-toggle" href="#"
                                 role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false">
@@ -96,8 +142,6 @@
 
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink"></div>
                         </div>
-
-                        <br />
 
                         <!-- DATE PICKERS -->
                         <div id="date_pickers"></div>
