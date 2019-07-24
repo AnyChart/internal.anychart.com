@@ -4,8 +4,13 @@ class GanttController extends EventTarget {
         this.selectedItem = null;
     }
 
+    preprocessData(filterFunction){
+        let data = filterFunction ? this.sourceData.filter(filterFunction) : this.sourceData;
+        this.tree = anychart.data.tree(data, 'as-table');
+        this.initTreeListeners();
+    }
+
     init(data, container = 'chart_container') {
-        console.log(data);
         return new Promise((resolve, reject) => {
             anychart.format.outputTimezone((new Date).getTimezoneOffset());
             function boldLabelsOverrider(label, dataItem) {
@@ -14,7 +19,9 @@ class GanttController extends EventTarget {
                 }
             }
 
-            this.tree = anychart.data.tree(data, 'as-table');
+            this.sourceData = data;
+            this.preprocessData()
+            
             this.chart = anychart.ganttProject();
 
             this.toolbar = anychart.ui.ganttToolbar();
@@ -113,13 +120,14 @@ class GanttController extends EventTarget {
             this.chart.getTimeline().lineMarker(0).value('current').stroke('3 green');
 
             this.initChartListeners();
-            this.initTreeListeners();
 
             this.chart.data(this.tree);
             this.chart.container(container);
             this.toolbar.draw();
             this.chart.draw();
             
+            this.createAddonsOnToolbar();
+
             if (isNaN(+min) || isNaN(+max))
                 this.chart.fitAll();
             else
@@ -173,5 +181,28 @@ class GanttController extends EventTarget {
         }
     }
 
+    createAddonsOnToolbar(){
+        const toolbar = $('.anychart-toolbar')
+        const toggleCompletedBtn = $('<button></button>');
+
+        toggleCompletedBtn
+            .text('Toggle Completed Tasks')
+            .addClass('float-right btn btn-sm btn-info')
+            .css('padding','1px 10px')
+
+        toggleCompletedBtn.on('click',()=>{
+            toggleCompletedBtn.toggleClass('btn-info btn-dark');
+            let filterFunction = null;
+            if (toggleCompletedBtn.hasClass('btn-dark')){
+                filterFunction = function (item){
+                    return item.progressValue != 1;
+                }
+            }
+            this.preprocessData(filterFunction);
+            this.chart.data(this.tree);
+        })
+
+        toolbar.append(toggleCompletedBtn)
+    }
 
 }
