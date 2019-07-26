@@ -11,6 +11,7 @@ class GanttResourceController extends EventTarget {
 
             this.tree = anychart.data.tree(data, 'as-table');
             this.chart = anychart.ganttResource();
+            this.chart.defaultRowHeight(30);
 
             this.toolbar = anychart.ui.ganttToolbar();
             this.toolbar.container(container);

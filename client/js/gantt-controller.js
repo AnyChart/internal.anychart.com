@@ -23,9 +23,10 @@ class GanttController extends EventTarget {
             this.preprocessData()
             
             this.chart = anychart.ganttProject();
+            this.chart.defaultRowHeight(35);
 
             this.toolbar = anychart.ui.ganttToolbar();
-            this.toolbar.container(container);
+            this.toolbar.container('toolbar_container');
             this.toolbar.target(this.chart);
 
             const dataGrid = this.chart.dataGrid();
@@ -104,7 +105,8 @@ class GanttController extends EventTarget {
                 .width(100)
                 .labels()
                     .useHtml(true)
-                    .format('<img src="{%userAvatar}" style="width: 16px; height: 16px"> {%userName}')
+                    .format('<img src="{%userAvatar}" style="width: 16px; height: 16px"> {%userName}');
+                    // .format('{%userName}');
 
             const progressColumn = dataGrid.column(5);
             progressColumn
@@ -117,7 +119,15 @@ class GanttController extends EventTarget {
             this.chart.splitterPosition(500);
 
             this.chart.xScale().minimumGap(0.2).maximumGap(0.2);
-            this.chart.getTimeline().lineMarker(0).value('current').stroke('3 green');
+            const timeline = this.chart.getTimeline();
+            timeline.lineMarker(0).value('current').stroke('3 green');
+
+            const ths = this;
+            timeline.tooltip().titleFormat(function() {
+                return ths.getParentNamesChain_(this.item);
+            });
+            //TODO maybe add more complex formatter.
+            timeline.tooltip().format('Actual: {%start}{dateTimeFormat:dd MMM} - {%end}{dateTimeFormat:dd MMM}\nPlanned: {%baselineStart}{dateTimeFormat:dd MMM} - {%baselineEnd}{dateTimeFormat:dd MMM}\nProgress: {%progress}');
 
             this.initChartListeners();
 
@@ -157,6 +167,16 @@ class GanttController extends EventTarget {
                 }
             );
         });
+    }
+
+    getParentNamesChain_(item) {
+        let name = item.get('name');
+        let parent = item.getParent();
+        while (parent) {
+            name = `${parent.get('name')} → ${name}`;
+            parent = parent.getParent();
+        }
+        return name;
     }
 
     initChartListeners() {

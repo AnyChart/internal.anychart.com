@@ -52,15 +52,32 @@ Queries.getProjectById = (id) => {
 /**
  * Insters new project record.
  * @param {string} name - Project name.
+ * @param {Array<string>} tasks - Dummy task names to be created.
  * @returns {Promise}
  */
-Queries.createProject = (name) => {
+Queries.createProject = (name, tasks = []) => {
     const now = Date.now();
     return Queries.query(`INSERT INTO project (id, name, last_modified) VALUES (NULL, "${name}", ${now})`)
         .then(() => Queries.getLastModifiedProject_(now))
         .then(lastModified => Queries.getProjectById(lastModified[0].id))
+        .then(projectData => {
+            console.log(projectData)
+            if (tasks.length) {
+                return Promise.all(tasks.map(
+                        taskName => Queries.createTask({
+                            name: taskName,
+                            project: projectData[0].id
+                        })
+                    ))
+                    .then(() => Promise.resolve(projectData))
+                    .catch(e => Promise.reject(e));
+            } else {
+                return Promise.resolve(projectData);
+            }
+        })
         .catch(err => Promise.reject(err));
 }
+
 
 /**
  * Updates project data.
@@ -141,6 +158,14 @@ Queries.filterNulls_ = (tasks) => {
     return Promise.resolve(tasks);
 }
 
+/**
+ * Gets root tasks names.
+ * @returns {Promise}
+ */
+Queries.getRootTaskNames = () => {
+    return Queries.query('SELECT task.name FROM task WHERE task.parent IS NULL GROUP BY task.name ORDER BY task.name');
+}
+
 
 /**
  * Gets tasks by project id.
@@ -218,7 +243,7 @@ Queries.createTask = (data) => {
     const now = Date.now();
     const query = `INSERT INTO
         task (id, name, url, priority, assignee, actualStart, actualEnd, baselineStart, baselineEnd, progressValue, parent, project, last_modified)
-        VALUES (NULL, "${data.name}", "${data.url}", "${data.priority}", ${data.assignee || NULL}, ${data.actualStart || NULL}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progressValue || NULL}, ${data.parent || NULL}, ${data.project}, ${now})`;
+        VALUES (NULL, "${data.name || ''}", "${data.url || ''}", "${data.priority || ''}", ${data.assignee || NULL}, ${data.actualStart || NULL}, ${data.actualEnd || NULL}, ${data.baselineStart || NULL}, ${data.baselineEnd || NULL}, ${+data.progressValue || NULL}, ${data.parent || NULL}, ${data.project}, ${now})`;
     return Queries
         .resetParents_(data.parentsToReset)
         .then(() => Queries.query(query))    

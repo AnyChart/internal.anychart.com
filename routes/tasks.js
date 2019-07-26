@@ -7,12 +7,21 @@ const Queries = require(__dirname + '/../db/qureies');
 /**
  * Returns list of tasks belonging to ptoject by id.
  */
-router.get('/:projectId', (req, res) => {
+router.get('/p/:projectId', (req, res) => {
     const projectId = req.params.projectId;
     Queries.getTasksByProjectId(projectId)
         .then(data => res.json(data))
         .catch(err => res.json({
             message: `Could not get tasks for project with id=${projectId}`,
+            error: err
+        }));
+});
+
+router.get('/roots', (req, res) => {
+    Queries.getRootTaskNames()
+        .then(data => res.json(data))
+        .catch(err => res.json({
+            message: 'Could not fetch root tasks',
             error: err
         }));
 });

@@ -143,3 +143,71 @@ function createNewProject() {
 
     }
 }
+
+function prepareDummyData() {
+    preloader.visible(true);
+    fetch('/tasks/roots')
+        .then(resp => resp.json())
+        .then(roots => {
+            const modal = $('#newDummyProject');
+            const checkboxes = $(modal.find('#dummyNames')[0]);
+            checkboxes.empty();
+            roots.forEach(r => {
+                checkboxes.append(createDummyCheckBox_(r));
+            });
+            preloader.visible(false);
+            modal.modal('show')
+        })
+        .catch(e => {
+            preloader.visible(false);
+            console.log(e)
+        });
+}
+
+function createDummyCheckBox_(data) {
+    return $(`<div class="form-check">
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input" value="${data.name}">${data.name}
+                </label>
+              </div>`);
+
+}
+
+function createNewDummyProject() {
+    const modal = $('#newDummyProject');
+
+    const action = modal.attr('data-action');
+    const newProjectName = $('#new_dummy_project_name').val();
+
+    if (newProjectName) {
+        const checkboxes = $(modal.find('#dummyNames')[0]);
+        const checked = checkboxes.find('.form-check-input:checkbox:checked');
+        const names = [];
+        checked.each(function () { //TODO Strange code, needs to be refactored.
+            names.push($(this).val());
+        });
+
+        fetch('/projects/add', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: newProjectName,
+                action: action,
+                tasks: names
+            })
+        })
+        .then(resp => resp.json())
+        .then(project => {
+            storage.add(project.id, project);
+            projectsContainer.prepend(addProject(project));
+            modal.modal('hide');
+        }).catch(e => {
+            modal.modal('hide');
+            console.log(e);
+        });
+    }
+
+}

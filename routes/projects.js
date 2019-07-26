@@ -38,9 +38,8 @@ router.get('/', (req, res) => {
 router.post('/add', (req, res) => {
     const newProjectName = req.body.name;
     const action = req.body.action;
-    if (action == 'empty') {
-        console.log(action);
-        Queries.createProject(newProjectName)
+    if (action == 'empty' || action == 'dummy') {
+        Queries.createProject(newProjectName, req.body.tasks)
             .then(newProject => res.json(newProject[0]))
             .catch(err => res.json({
                 message: `Could not create project \"${newProjectName}\"`,

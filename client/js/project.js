@@ -37,7 +37,7 @@ controller.addEventListener('itemDeselect', (e) => {
 
 anychart.onDocumentReady(() => {
     dpController.init();
-    fetch(`/tasks/${projectId}`)
+    fetch(`/tasks/p/${projectId}`)
         .then(resp => resp.json())
         .then(tasks => {
             tasksStorage.sync(tasks);

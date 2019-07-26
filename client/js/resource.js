@@ -6,7 +6,7 @@ preloader.visible(true);
 const controller = new GanttResourceController();
 
 anychart.onDocumentReady(() => {
-    fetch(`/tasks/${projectId}`)
+    fetch(`/tasks/p/${projectId}`)
         .then(resp => resp.json())
         .then(tasks => controller.init(tasks))
         .then(() => {
