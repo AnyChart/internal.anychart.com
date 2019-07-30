@@ -61,7 +61,7 @@ Queries.createProject = (name, tasks = []) => {
         .then(() => Queries.getLastModifiedProject_(now))
         .then(lastModified => Queries.getProjectById(lastModified[0].id))
         .then(projectData => {
-            console.log(projectData)
+            // console.log(projectData)
             if (tasks.length) {
                 return Promise.all(tasks.map(
                         taskName => Queries.createTask({

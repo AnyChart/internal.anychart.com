@@ -11,6 +11,7 @@
     <link href="/css/external/anychart-ui.min.css" type="text/css" rel="stylesheet">
     <link href="/css/external/bootstrap.min.css" type="text/css" rel="stylesheet">
     <link href="/css/external/bootstrap-datepicker.min.css" type="text/css" rel="stylesheet">
+    <!-- <link href="/js/external/color-picker/css/bootstrap-colorpicker.min.css" type="text/css" rel="stylesheet"> -->
 
     <script src="/js/external/jquery-3.4.0.min.js"></script>
     <script src="/js/external/popper.min.js"></script>
@@ -18,6 +19,7 @@
 
     <script src="/js/external/anychart-bundle.min.js"></script>
     <script src="/js/external/bootstrap-datepicker.min.js"></script>
+    <!-- <script src="/js/external/color-picker/js/bootstrap-colorpicker.min.js"></script> -->
 
     <script src="/js/ListStorage.js"></script>
 
@@ -35,6 +37,7 @@
             width: 120px;
             text-align: right;
         }
+
         .input-group-text {
             width: 100%;
             text-align: right;
@@ -43,25 +46,58 @@
         .user-image {
             width: 32px;
             height: 32px;
-            border-radius:16px;
+            border-radius: 16px;
         }
 
-        .prio{
+        .prio {
             font-weight: bold;
             text-align: center;
             width: 100%;
         }
-        .prio-1{color:rgb(255, 0, 0)}
-        .prio-2{color: #eb2121cc}
-        .prio-3{color: #f79311}
-        .prio-4{color: #faea0f}
-        .prio-5{color: #ece927ad}
-        .prio-6{color: #d0ff00bb}
-        .prio-7{color: #d0ff00}
-        .prio-8{color: #7d9c4350}
-        .prio-9{color: #3d262627}
-        .prio-qst{color:deepskyblue}
-        .prio-drop{color:darkgray}
+
+        .prio-1 {
+            color: rgb(255, 0, 0)
+        }
+
+        .prio-2 {
+            color: #eb2121cc
+        }
+
+        .prio-3 {
+            color: #f79311
+        }
+
+        .prio-4 {
+            color: #faea0f
+        }
+
+        .prio-5 {
+            color: #ece927ad
+        }
+
+        .prio-6 {
+            color: #d0ff00bb
+        }
+
+        .prio-7 {
+            color: #d0ff00
+        }
+
+        .prio-8 {
+            color: #7d9c4350
+        }
+
+        .prio-9 {
+            color: #3d262627
+        }
+
+        .prio-qst {
+            color: deepskyblue
+        }
+
+        .prio-drop {
+            color: darkgray
+        }
     </style>
 
 
@@ -79,7 +115,7 @@
     </nav>
 
     <div class="container-fluid" id="toolbar_container"></div>
-    <div class="container-fluid" style="height: 100%; max-height: 600px">
+    <div class="container-fluid" style="height: calc(100% - 100px)">
         <div class="row">
             <div class="col">
                 <div class="card">
@@ -144,11 +180,32 @@
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink"></div>
                         </div>
 
+                        <!-- COLORPICKER -->
+
+                        <!-- <div id="cp2" class="input-group mb-3 colorpicker-component">
+                            <div class="form-row">
+                                <div class="col">
+                                    <input type="checkbox" class="form-check-input" id="colorCheck">
+                                    <input for="colorCheck" type="text" value="#00AABB" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <span class="input-group-addon"><i></i></span>
+                                </button>
+                            </div>
+                        </div>
+                        <script>
+                            $(function () {
+                                $('#cp2').colorpicker();
+                            });
+                        </script> -->
+
                         <!-- DATE PICKERS -->
                         <div id="date_pickers"></div>
 
                         <!-- PROGRESS -->
-                        <br/>
+                        <br />
                         <div>
                             <input type="range" step="10" value="0" id="task_progress" list="tickmarks"
                                 oninput="changeProgress(this.value)" onchange="changeProgress(this.value)">
