@@ -6,6 +6,18 @@ class GanttController extends EventTarget {
 
     preprocessData(filterFunction){
         let data = filterFunction ? this.sourceData.filter(filterFunction) : this.sourceData;
+        let now = Date.now();
+        data.forEach(item=>{
+            if (item.baselineStart && item.baselineStart < now  && item.baselineEnd && item.baselineEnd > now){
+                let fullTime = item.baselineEnd - item.baselineStart;
+                let current = now - item.baselineStart;
+                item.baselineProgressValue = +(current/fullTime).toFixed(2);
+                console.log(item);
+            }
+        });
+        data.sort(function(a,b){
+            return + a.priority - b.priority
+        });
         this.tree = anychart.data.tree(data, 'as-table');
         this.initTreeListeners();
     }
@@ -14,7 +26,8 @@ class GanttController extends EventTarget {
         return new Promise((resolve, reject) => {
             anychart.format.outputTimezone((new Date).getTimezoneOffset());
             function boldLabelsOverrider(label, dataItem) {
-                if (dataItem.numChildren()) {
+                console.log(dataItem)
+                if (dataItem.numChildren() || !dataItem.getParent()) {
                     label.fontWeight('bold').fontStyle('italic');
                 }
             }
@@ -23,7 +36,7 @@ class GanttController extends EventTarget {
             this.preprocessData()
             
             this.chart = anychart.ganttProject();
-            this.chart.defaultRowHeight(35);
+            this.chart.defaultRowHeight(25);
 
             this.toolbar = anychart.ui.ganttToolbar();
             this.toolbar.container('toolbar_container');
@@ -57,7 +70,7 @@ class GanttController extends EventTarget {
                 .title('')
                 .width(30)
                 .collapseExpandButtons(false)
-                .depthPaddingMultiplier(5)
+                .depthPaddingMultiplier(1)
                 .labels()
                     .useHtml(true)
                     .format(function() {
@@ -71,7 +84,7 @@ class GanttController extends EventTarget {
                                 clc="drop";
                                 break;
                         }
-                        return `<i class="prio prio-${clc}">${clc || ''}</i>`;
+                        return `<span class="prio prio-${clc}">&nbsp;${clc || ''}&nbsp;</span>`;
                     });
 
             const taskColumn = dataGrid.column(2);
@@ -105,7 +118,13 @@ class GanttController extends EventTarget {
                 .width(100)
                 .labels()
                     .useHtml(true)
-                    .format('<img src="{%userAvatar}" style="width: 16px; height: 16px"> {%userName}');
+                    .format((a,b)=>{
+                        let userPic = a.item.get('userAvatar');
+                        let userName = a.item.get('userName');
+                        if (userPic)
+                            return `<img src="${userPic}" style="width:24px; height: 24px;border-radius:12px;"> ${userName}`;
+                        else return '';
+                    });
                     // .format('{%userName}');
 
             const progressColumn = dataGrid.column(5);
@@ -220,6 +239,7 @@ class GanttController extends EventTarget {
             }
             this.preprocessData(filterFunction);
             this.chart.data(this.tree);
+            this.chart.fitAll();
         })
 
         toolbar.append(toggleCompletedBtn)
