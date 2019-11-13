@@ -81,7 +81,7 @@ class GanttController extends EventTarget {
                             case '?':
                                 className="qst";
                                 break;
-                            case 'x':
+                            case 'X':
                                 className="drop";
                                 break;
                         }
@@ -116,7 +116,7 @@ class GanttController extends EventTarget {
             const assigneeColumn = dataGrid.column(4);
             assigneeColumn
                 .title('Assignee')
-                .width(100)
+                .width(115)
                 .labels()
                     .useHtml(true)
                     .format((a,b)=>{
