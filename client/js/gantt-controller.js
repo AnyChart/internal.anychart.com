@@ -136,7 +136,8 @@ class GanttController extends EventTarget {
                 .labels()
                     .format('{%progress}');
 
-            this.chart.splitterPosition(500);
+            this.chart.splitterPosition(515);
+            dataGrid.fixedColumns(true);
 
             this.chart.xScale().minimumGap(0.2).maximumGap(0.2);
             const timeline = this.chart.getTimeline();
