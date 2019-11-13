@@ -76,15 +76,16 @@ class GanttController extends EventTarget {
                     .format(function() {
                         const item = this.item;
                         let clc=item.get('priority');
+                        let className = clc;
                         switch(clc){
                             case '?':
-                                clc="qst";
+                                className="qst";
                                 break;
                             case 'x':
-                                clc="drop";
+                                className="drop";
                                 break;
                         }
-                        return `<span class="prio prio-${clc}">&nbsp;${clc || ''}&nbsp;</span>`;
+                        return `<span class="prio prio-${className}">&nbsp;${clc || ''}&nbsp;</span>`;
                     });
 
             const taskColumn = dataGrid.column(2);
