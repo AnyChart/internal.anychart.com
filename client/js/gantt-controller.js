@@ -2,31 +2,106 @@ class GanttController extends EventTarget {
     constructor() {
         super();
         this.selectedItem = null;
+        this._lastUsedFilterFunction = undefined;
+        this._filterByUserRepaintNeeded = true;
     }
 
-    preprocessData(filterFunction){
+    updateTasks(data) {
+        if (data) {
+            this.sourceData = data;
+            this._filterByUserRepaintNeeded = true;
+        }
+        // console.log(this._lastUsedFilterFunction)
+        this.preprocessData(this._lastUsedFilterFunction);
+        this.chart.data(this.tree);
+        this.chart.fitAll();
+    }
+
+    createUsersFilter() {
+        if (this._filterByUserRepaintNeeded && usersStorage && usersStorage.storage[1]) {
+            const filterPane = $('#filter-by-user');
+            filterPane.html('');
+            filterPane.append(
+                $('<button class="btn celar-filter-user">')
+                .append($('<i class="ac ac-group" style="font-size:30"></i>'))
+                .append($('<br/><span>Все</span>'))
+            );
+
+            Object
+                .values(usersStorage.storage)
+                .sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0)
+                .forEach(user => {
+                    let usrBtn = $('<button></button>');
+                    usrBtn.attr('data-rel', user.id)
+                        .addClass('btn filter-user')
+                        .append(`<img src="${user.avatar}" class="rounded-circle" width="32">`)
+                        .append(`<br/><span>${user.name}</span>`);
+
+                    if (!this._usersInCurrentData.includes(user.id))
+                        usrBtn.attr('disabled', true);
+                    filterPane.append(usrBtn);
+                });
+
+            let filterUserElements = $('.filter-user');
+
+            filterUserElements.on('click', (e) => {
+                if (!e.shiftKey) filterUserElements.removeClass('active');
+                let ths = $(e.currentTarget);
+                ths.toggleClass('active');
+                this.filterDataBySelectedUsers();
+            });
+
+            $('.celar-filter-user').on('click', () => {
+                filterUserElements.removeClass('active');
+                this.filterDataBySelectedUsers();
+            })
+
+            this._filterByUserRepaintNeeded = false;
+        }
+    }
+
+    filterDataBySelectedUsers() {
+        $('#toggleCompletedBtn')
+            .removeClass('btn-dark')
+            .addClass('btn-info');
+        let filterUserIds = [];
+        $('.filter-user.active').each((i, item) => {
+            filterUserIds.push(+$(item).attr('data-rel'))
+        });
+        this._lastUsedFilterFunction = function (item) {
+            if (filterUserIds.length && item.userId) {
+                return filterUserIds.includes(item.userId);
+            } else return true;
+        }
+        this.updateTasks();
+    }
+
+    preprocessData(filterFunction) {
         let data = filterFunction ? this.sourceData.filter(filterFunction) : this.sourceData;
+        this._lastUsedFilterFunction = filterFunction;
         let now = Date.now();
-        data.forEach(item=>{
-            if (item.baselineStart && item.baselineStart < now  && item.baselineEnd && item.baselineEnd > now){
+        this._usersInCurrentData = [];
+        data.forEach(item => {
+            if (item.baselineStart && item.baselineStart < now && item.baselineEnd && item.baselineEnd > now) {
                 let fullTime = item.baselineEnd - item.baselineStart;
                 let current = now - item.baselineStart;
-                item.baselineProgressValue = +(current/fullTime).toFixed(2);
-                console.log(item);
+                item.baselineProgressValue = +(current / fullTime).toFixed(2);
             }
+            this._usersInCurrentData.push(item.userId);
         });
-        data.sort(function(a,b){
-            return + a.priority - b.priority
+        data.sort(function (a, b) {
+            return +a.priority - b.priority
         });
         this.tree = anychart.data.tree(data, 'as-table');
         this.initTreeListeners();
+        this.createUsersFilter();
     }
 
     init(data, container = 'chart_container') {
         return new Promise((resolve, reject) => {
             anychart.format.outputTimezone((new Date).getTimezoneOffset());
+
             function boldLabelsOverrider(label, dataItem) {
-                console.log(dataItem)
                 if (dataItem.numChildren() || !dataItem.getParent()) {
                     label.fontWeight('bold').fontStyle('italic');
                 }
@@ -34,7 +109,7 @@ class GanttController extends EventTarget {
 
             this.sourceData = data;
             this.preprocessData()
-            
+
             this.chart = anychart.ganttProject();
             this.chart.defaultRowHeight(25);
 
@@ -51,19 +126,23 @@ class GanttController extends EventTarget {
             indexColumn.labels()
                 .useHtml(true)
                 .width(35)
-                .format(function() {
+                .format(function () {
                     const item = this.item;
-                    let params = {color:'red', id: this.item.get('id'), name: this.item.get('name')};
-                    if (item.numChildren()){
+                    let params = {
+                        color: 'red',
+                        id: this.item.get('id'),
+                        name: this.item.get('name')
+                    };
+                    if (item.numChildren()) {
                         params.color = 'gray';
                         params.id = 'x';
                     }
                     return rowIndexTemplate
-                            .replace('{index}', String(this.linearIndex))
-                            .replace('{color}', params.color)
-                            .replace('{id}', params.id)
-                            .replace('{name}', params.name);
-                });            
+                        .replace('{index}', String(this.linearIndex))
+                        .replace('{color}', params.color)
+                        .replace('{id}', params.id)
+                        .replace('{name}', params.name);
+                });
 
             const priorityColumn = dataGrid.column(1);
             priorityColumn
@@ -72,21 +151,21 @@ class GanttController extends EventTarget {
                 .collapseExpandButtons(false)
                 .depthPaddingMultiplier(1)
                 .labels()
-                    .useHtml(true)
-                    .format(function() {
-                        const item = this.item;
-                        let clc=item.get('priority');
-                        let className = clc;
-                        switch(clc){
-                            case '?':
-                                className="qst";
-                                break;
-                            case 'X':
-                                className="drop";
-                                break;
-                        }
-                        return `<span class="prio prio-${className}">&nbsp;${clc || ''}&nbsp;</span>`;
-                    });
+                .useHtml(true)
+                .format(function () {
+                    const item = this.item;
+                    let clc = item.get('priority');
+                    let className = clc;
+                    switch (clc) {
+                        case '?':
+                            className = "qst";
+                            break;
+                        case 'X':
+                            className = "drop";
+                            break;
+                    }
+                    return `<span class="prio prio-${className}">&nbsp;${clc || ''}&nbsp;</span>`;
+                });
 
             const taskColumn = dataGrid.column(2);
             taskColumn
@@ -101,32 +180,32 @@ class GanttController extends EventTarget {
                 .title('URL')
                 .width(70)
                 .labels()
-                    .useHtml(true)
-                    .fontSize(10)
-                    .format(function() {
-                        const item = this.item;
-                        let name = item.get('url') || '';
-                        let url = item.get('url') || '';
-                        if (name && ['dv','ts','en'].includes(name.substr(0,2).toLowerCase())){
-                            url = 'https://anychart.atlassian.net/browse/'+url;
-                        }
-                        return `<a href="${url}" target="_blank">${name}</a>`;
-                    });
+                .useHtml(true)
+                .fontSize(10)
+                .format(function () {
+                    const item = this.item;
+                    let name = item.get('url') || '';
+                    let url = item.get('url') || '';
+                    if (name && ['dv', 'ts', 'en'].includes(name.substr(0, 2).toLowerCase())) {
+                        url = 'https://anychart.atlassian.net/browse/' + url;
+                    }
+                    return `<a href="${url}" target="_blank">${name}</a>`;
+                });
 
             const assigneeColumn = dataGrid.column(4);
             assigneeColumn
                 .title('Assignee')
                 .width(115)
                 .labels()
-                    .useHtml(true)
-                    .format((a,b)=>{
-                        let userPic = a.item.get('userAvatar');
-                        let userName = a.item.get('userName');
-                        if (userPic)
-                            return `<img src="${userPic}" style="width:24px; height: 24px;border-radius:12px;"> ${userName}`;
-                        else return '';
-                    });
-                    // .format('{%userName}');
+                .useHtml(true)
+                .format((a, b) => {
+                    let userPic = a.item.get('userAvatar');
+                    let userName = a.item.get('userName');
+                    if (userPic)
+                        return `<img src="${userPic}" style="width:24px; height: 24px;border-radius:12px;"> ${userName}`;
+                    else return '';
+                });
+            // .format('{%userName}');
 
             const progressColumn = dataGrid.column(5);
             progressColumn
@@ -134,7 +213,7 @@ class GanttController extends EventTarget {
                 .width(40)
                 .labelsOverrider(boldLabelsOverrider)
                 .labels()
-                    .format('{%progress}');
+                .format('{%progress}');
 
             this.chart.splitterPosition(515);
             dataGrid.fixedColumns(true);
@@ -144,7 +223,7 @@ class GanttController extends EventTarget {
             timeline.lineMarker(0).value('current').stroke('3 green');
 
             const ths = this;
-            timeline.tooltip().titleFormat(function() {
+            timeline.tooltip().titleFormat(function () {
                 return ths.getParentNamesChain_(this.item);
             });
             //TODO maybe add more complex formatter.
@@ -156,7 +235,7 @@ class GanttController extends EventTarget {
             this.chart.container(container);
             this.toolbar.draw();
             this.chart.draw();
-            
+
             this.createAddonsOnToolbar();
 
             if (isNaN(+min) || isNaN(+max))
@@ -169,7 +248,7 @@ class GanttController extends EventTarget {
     }
 
     initTreeListeners() {
-        this.tree.listen('treeItemMove', function(e) {
+        this.tree.listen('treeItemMove', function (e) {
             preloader.visible(false);
             const destination = e.target;
             const item = e.item;
@@ -222,20 +301,41 @@ class GanttController extends EventTarget {
         }
     }
 
-    createAddonsOnToolbar(){
+    createAddonsOnToolbar() {
         const toolbar = $('.anychart-toolbar')
-        const toggleCompletedBtn = $('<button></button>');
+        const updateDataBtn = $('<div></div>');
+
+        updateDataBtn
+            .addClass('float-right btn btn-sm btn-warning')
+            .css('padding', '1px 10px')
+            .css('margin', '1px 10px')
+
+        updateDataBtn
+            .append('<i class="ac ac-refresh"></i>')
+            .append('<span>   Update Data</span>')
+
+        updateDataBtn.on('click', updateData);
+
+        toolbar.append(updateDataBtn)
+
+
+        const toggleCompletedBtn = $('<div id="toggleCompletedBtn"></div>');
 
         toggleCompletedBtn
-            .text('Toggle Completed Tasks')
             .addClass('float-right btn btn-sm btn-info')
-            .css('padding','1px 10px')
+            .css('padding', '1px 10px')
+            .css('margin', '1px 10px');
 
-        toggleCompletedBtn.on('click',()=>{
+        toggleCompletedBtn
+            .append('<i class="ac ac-clipboard"></i>')
+            .append('<span>   Toggle Completed Tasks</span>')
+
+        toggleCompletedBtn.on('click', () => {
+            $('.filter-user.active').removeClass('active');
             toggleCompletedBtn.toggleClass('btn-info btn-dark');
             let filterFunction = null;
-            if (toggleCompletedBtn.hasClass('btn-dark')){
-                filterFunction = function (item){
+            if (toggleCompletedBtn.hasClass('btn-dark')) {
+                filterFunction = function (item) {
                     return item.progressValue != 1;
                 }
             }
@@ -245,6 +345,7 @@ class GanttController extends EventTarget {
         })
 
         toolbar.append(toggleCompletedBtn)
+
     }
 
 }

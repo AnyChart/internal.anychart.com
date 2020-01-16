@@ -25,6 +25,10 @@ controller.addEventListener('itemSelect', (e) => {
     $('#progress_label').html(`Progress: ${progress}%`);
     addState = 'edit';
 
+    if(item.numChildren() || !item.getParent()){
+        $('#child-props').hide();
+    }else $('#child-props').show();
+
     $('#task_name').focus();
 });
 
@@ -53,11 +57,21 @@ anychart.onDocumentReady(() => {
                 .then(users => {
                     usersStorage.sync(users);
                     buildUsersDropdown();
+                    controller.createUsersFilter();
                     return Promise.resolve();
                 })
                 .then(() => preloader.visible(false));
         })
 });
+
+function updateData(){
+    fetch(`/tasks/p/${projectId}`)
+        .then(resp => resp.json())
+        .then(tasks => {
+            tasksStorage.sync(tasks);
+            return controller.updateTasks(tasks);
+        })
+}
 
 function addTask() {
     $('#task_panel').css('display', 'block');

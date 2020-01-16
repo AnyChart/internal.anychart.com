@@ -106,6 +106,10 @@
         .row, .row .card {
            height: 100%;
         }
+
+        .filter-user.active img {
+            border: 16px solid blue;
+        }
     </style>
 
 
@@ -121,7 +125,7 @@
                 Task</button>
         </div>
     </nav>
-
+    <div class="container-fluid" id="filter-by-user"></div>
     <div class="container-fluid" id="toolbar_container"></div>
     <div class="container-fluid" style="height: calc(100% - 100px)">
         <div class="row">
@@ -144,99 +148,98 @@
                             <input id="task_name" type="text" class="form-control" placeholder="Task name"
                                 aria-describedby="basic-addon2">
                         </div>
-
-                        <!-- TICKET URL -->
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">Task URL</span>
+                        <div id="child-props">
+                            <!-- TICKET URL -->
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Task URL</span>
+                                </div>
+                                <input id="task_url" type="text" class="form-control" placeholder="Task Ticket URL"
+                                    aria-describedby="basic-addon2">
                             </div>
-                            <input id="task_url" type="text" class="form-control" placeholder="Task Ticket URL"
-                                aria-describedby="basic-addon2">
-                        </div>
 
-                        <!-- Priority -->
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">Priority</span>
+                            <!-- Priority -->
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Priority</span>
+                                </div>
+                                <select id="task_priority" class="form-control">
+                                    <option></option>
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                    <option>6</option>
+                                    <option>7</option>
+                                    <option>8</option>
+                                    <option>9</option>
+                                    <option>?</option>
+                                    <option>X</option>
+                                </select>
                             </div>
-                            <select id="task_priority" class="form-control">
-                                <option></option>
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                                <option>6</option>
-                                <option>7</option>
-                                <option>8</option>
-                                <option>9</option>
-                                <option>?</option>
-                                <option>X</option>
-                            </select>
-                        </div>
 
-                        <!-- ASSIGNEE -->
-                        <div class="dropdown input-group mb-3" id="assignee">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">Assignee</span>
+                            <!-- ASSIGNEE -->
+                            <div class="dropdown input-group mb-3" id="assignee">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Assignee</span>
+                                </div>
+                                <a id="current_assignee" class="btn btn-outline-secondary dropdown-toggle" href="#"
+                                    role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false">
+                                </a>
+
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink"></div>
                             </div>
-                            <a id="current_assignee" class="btn btn-outline-secondary dropdown-toggle" href="#"
-                                role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false">
-                            </a>
 
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink"></div>
-                        </div>
+                            <!-- COLORPICKER -->
 
-                        <!-- COLORPICKER -->
-
-                        <!-- <div id="cp2" class="input-group mb-3 colorpicker-component">
-                            <div class="form-row">
-                                <div class="col">
-                                    <input type="checkbox" class="form-check-input" id="colorCheck">
-                                    <input for="colorCheck" type="text" value="#00AABB" class="form-control" />
+                            <!-- <div id="cp2" class="input-group mb-3 colorpicker-component">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input type="checkbox" class="form-check-input" id="colorCheck">
+                                        <input for="colorCheck" type="text" value="#00AABB" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        <span class="input-group-addon"><i></i></span>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button">
-                                    <span class="input-group-addon"><i></i></span>
-                                </button>
+                            <script>
+                                $(function () {
+                                    $('#cp2').colorpicker();
+                                });
+                            </script> -->
+
+                            <!-- DATE PICKERS -->
+                            <div id="date_pickers"></div>
+
+                            <!-- PROGRESS -->
+                            <br />
+                            <div>
+                                <input type="range" step="10" value="0" id="task_progress" list="tickmarks"
+                                    oninput="changeProgress(this.value)" onchange="changeProgress(this.value)">
+
+                                <datalist id="tickmarks">
+                                    <option value="0" label="0%">
+                                    <option value="10">
+                                    <option value="20">
+                                    <option value="30">
+                                    <option value="40">
+                                    <option value="50" label="50%">
+                                    <option value="60">
+                                    <option value="70">
+                                    <option value="80">
+                                    <option value="90">
+                                    <option value="100" label="100%">
+                                </datalist>
+                                <label for="task_progress" id="progress_label">Progress: 0%</label>
                             </div>
                         </div>
-                        <script>
-                            $(function () {
-                                $('#cp2').colorpicker();
-                            });
-                        </script> -->
-
-                        <!-- DATE PICKERS -->
-                        <div id="date_pickers"></div>
-
-                        <!-- PROGRESS -->
-                        <br />
-                        <div>
-                            <input type="range" step="10" value="0" id="task_progress" list="tickmarks"
-                                oninput="changeProgress(this.value)" onchange="changeProgress(this.value)">
-
-                            <datalist id="tickmarks">
-                                <option value="0" label="0%">
-                                <option value="10">
-                                <option value="20">
-                                <option value="30">
-                                <option value="40">
-                                <option value="50" label="50%">
-                                <option value="60">
-                                <option value="70">
-                                <option value="80">
-                                <option value="90">
-                                <option value="100" label="100%">
-                            </datalist>
-                            <label for="task_progress" id="progress_label">Progress: 0%</label>
-                        </div>
-
                         <button class="btn btn-outline-success ml-auto mr-1" onclick="commitTask()">Apply</button>
                         <button class="btn btn-outline-secondary ml-auto mr-1" onclick="closeTask()">Close</button>
-
                     </div>
                 </div>
             </div>
