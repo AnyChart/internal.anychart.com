@@ -45,9 +45,16 @@ class GanttController extends EventTarget {
             let filterUserElements = $('.filter-user');
 
             filterUserElements.on('click', (e) => {
-                if (!e.shiftKey) filterUserElements.removeClass('active');
                 let ths = $(e.currentTarget);
-                ths.toggleClass('active');
+                if (e.shiftKey){
+                    ths.toggleClass('active');
+                }else{
+                    ths.toggleClass('active');
+                    if ($('.filter-user.active').length > 1){
+                        filterUserElements.removeClass('active');
+                        ths.addClass('active');
+                    }
+                }                
                 this.filterDataBySelectedUsers();
             });
 
