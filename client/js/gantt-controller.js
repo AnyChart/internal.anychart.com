@@ -191,9 +191,9 @@ class GanttController extends EventTarget {
                 .fontSize(10)
                 .format(function () {
                     const item = this.item;
-                    let name = item.get('url') || '';
                     let url = item.get('url') || '';
-                    if (name && ['dv', 'ts', 'en'].includes(name.substr(0, 2).toLowerCase())) {
+                    let name = url;
+                    if (name && name.match(new RegExp("[A-z]+\-[0-9]+"))) {
                         url = 'https://anychart.atlassian.net/browse/' + url;
                     }
                     return `<a href="${url}" target="_blank">${name}</a>`;
