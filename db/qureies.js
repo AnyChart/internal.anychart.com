@@ -1,6 +1,8 @@
 const connect = require(__dirname+'/connect');
 const NULL = 'NULL';
 
+//TODO добавить логгирование каждого запроса
+
 class Queries { }
 
 // ------- Common.
@@ -37,7 +39,7 @@ Queries.getLastModifiedProject_ = (date) => {
  * @returns {Promise}
  */
 Queries.getProjects = () => {
-    return Queries.query('SELECT * FROM project WHERE deleted=0 ORDER BY last_modified DESC');
+    return Queries.query('SELECT * FROM project WHERE deleted=0 ORDER BY id DESC');
 }
 
 /**
@@ -260,6 +262,11 @@ Queries.updateTask = (data) => {
         .query(query)
         .then(() => Queries.getLastModifiedTask_(now))
         .catch(err => Promise.reject(err));
+}
+
+Queries.logAction = (data) => {
+    const query = `INSERT INTO log_action (email, action, log) VALUES ('${data.email}', '${data.action}', '${data.log}')`;
+    return Queries.query(query)
 }
 
 module.exports = Queries;

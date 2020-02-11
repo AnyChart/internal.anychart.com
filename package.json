@@ -39,6 +39,9 @@
     "body-parser": "^1.19.0",
     "consolidate": "^0.15.1",
     "express": "^4.16.4",
+    "express-session": "^1.17.0",
+    "googleapis": "^47.0.0",
+    "jira-connector": "^3.1.0",
     "mustache": "^3.0.1",
     "mysql": "^2.17.1"
   }

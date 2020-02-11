@@ -29,7 +29,14 @@ router.post('/add', (req, res) => {
         .catch(err => res.json({
             message: 'Could not create new user',
             error: err
-        }));
+        }))
+        .then((a) => {
+            Queries.logAction({
+                email: req.session.googleUser.email,
+                action: 'Add',
+                log: `User ${req.body.id} (${JSON.stringify(req.body)})`
+            })
+        });
 });
 
 router.post('/update', (req, res) => {
@@ -38,7 +45,14 @@ router.post('/update', (req, res) => {
         .catch(err => res.json({
             message: `Could not update user with id="${req.body.id}"`,
             error: err
-        }));
+        }))
+        .then((a) => {
+            Queries.logAction({
+                email: req.session.googleUser.email,
+                action: 'update',
+                log: `User ${req.body.id} (${JSON.stringify(req.body)})`
+            })
+        });
 });
 
 module.exports = router;

@@ -1,4 +1,3 @@
-
 const preloader = anychart.ui.preloader();
 preloader.render();
 preloader.visible(true);
@@ -25,9 +24,16 @@ controller.addEventListener('itemSelect', (e) => {
     $('#progress_label').html(`Progress: ${progress}%`);
     addState = 'edit';
 
-    if(item.numChildren() || !item.getParent()){
+    if (item.numChildren() || !item.getParent()) {
         $('#child-props').hide();
-    }else $('#child-props').show();
+    } else $('#child-props').show();
+
+    if (
+        e.currentUser.isAdmin ||
+        e.currentUser.name.includes(item.get('userName'))
+       ){
+        $('#apply-btn').show();
+    }else $('#apply-btn').hide();
 
     $('#task_name').focus();
 });
@@ -39,32 +45,38 @@ controller.addEventListener('itemDeselect', (e) => {
     $('#task_panel').css('display', 'none');
 });
 
-anychart.onDocumentReady(() => {
+
+$(() => {
     dpController.init();
-    fetch(`/tasks/p/${projectId}`)
+    fetch('/curr-user')
         .then(resp => resp.json())
-        .then(tasks => {
-            tasksStorage.sync(tasks);
-            return controller.init(tasks);
-        })
-        .then(() => {
-            $('#task_panel').css('display', 'none');
-            return Promise.resolve();
-        })
-        .then(() => {
-            fetch('/users/data')
-                .then(r => r.json())
-                .then(users => {
-                    usersStorage.sync(users);
-                    buildUsersDropdown();
-                    controller.createUsersFilter();
+        .then(currentUserData => {
+            return fetch(`/tasks/p/${projectId}`)
+                .then(resp => resp.json())
+                .then(tasks => {
+                    // console.log(tasks)
+                    tasksStorage.sync(tasks);
+                    return controller.init(tasks, currentUserData);
+                })
+                .then(() => {
+                    $('#task_panel').css('display', 'none');
                     return Promise.resolve();
                 })
-                .then(() => preloader.visible(false));
+                .then(() => {
+                    fetch('/users/data')
+                        .then(r => r.json())
+                        .then(users => {
+                            usersStorage.sync(users);
+                            buildUsersDropdown();
+                            controller.createUsersFilter();
+                            return Promise.resolve();
+                        })
+                        .then(() => preloader.visible(false));
+                })
         })
 });
 
-function updateData(){
+function updateData() {
     fetch(`/tasks/p/${projectId}`)
         .then(resp => resp.json())
         .then(tasks => {
@@ -74,6 +86,7 @@ function updateData(){
 }
 
 function addTask() {
+    
     $('#task_panel').css('display', 'block');
     addState = 'new';
     updateSelectedUser(null);
@@ -124,7 +137,10 @@ function buildUsersDropdown() {
 
 }
 
-function getParentsToResetChain(item = null, parentsData = { ids: [], items: [] }) {
+function getParentsToResetChain(item = null, parentsData = {
+    ids: [],
+    items: []
+}) {
     if (item) {
         if (item.get('actualStart') || item.get('actualEnd') || item.get('progressValue') != null) {
             parentsData.ids.push(item.get('id'));
@@ -181,7 +197,7 @@ function commitTask() {
                         console.error(tasks);
                     } else {
                         const updatedTask = tasks[0];
-                        
+
                         tasksStorage.add(updatedTask.id, updatedTask);
 
                         controller.chart.autoRedraw(false);
@@ -252,7 +268,7 @@ function resetTask() {
     $('#task_name').val('');
     $('#task_url').val('');
     $('#task_priority').val('');
-    
+
     updateSelectedUser(null);
     $('#task_progress').val('0');
     $('#progress_label').html('Progress: 0%');

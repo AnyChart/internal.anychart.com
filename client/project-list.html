@@ -27,8 +27,8 @@
         <a class="navbar-brand" href="#"><img class="navbar-brand" src="/images/ac.png" width="30px" /> Current
             Projects</a>
         <div class="btn-group">
-            <a class="nav-link" href="/users">Manage users</a>
-            <button class="btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown"
+            <a class="nav-link manager-controls" href="/users">Manage users</a>
+            <button class="btn btn-outline-success dropdown-toggle manager-controls" type="button" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">Create Project</button>
             <div class="dropdown-menu dropdown-menu-right">
                 <a class="dropdown-item" href="#" onclick="prepareDummyData()"
@@ -37,10 +37,15 @@
                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#newProject"
                     data-action="empty"><span class="ac ac-edit"></span> Create empty project</a>
             </div>
+            <div id="user-profile" style="margin-left: 20px;">
+                <img class="rounded" style="width:40px">
+            </div>
         </div>
     </nav>
 
-    <div class="my-3 p-3 bg-white rounded shadow-sm" id="current_projects"></div>
+    <div class="row">
+        <div class="col-sm-12" id="current_projects"></div>
+    </div>
 
     <div class="modal" id="newProject" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -89,7 +94,7 @@
         </div>
     </div>
 
-    <script src="/js/index.js"> </script>
+    <script src="/js/project-list.js"> </script>
 
 </body>
 

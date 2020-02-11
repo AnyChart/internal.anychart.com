@@ -45,7 +45,14 @@ router.post('/add', (req, res) => {
             .catch(err => res.json({
                 message: `Could not create project \"${newProjectName}\"`,
                 error: err
-            }));
+            }))
+            .then((a) => {
+                Queries.logAction({
+                    email: req.session.googleUser.email,
+                    action: 'Add',
+                    log: `Resource ${req.body.id} (${JSON.stringify(req.body)})`
+                })
+            });
     } else {
         console.log(action);
         res.json({ message: action });
@@ -59,7 +66,14 @@ router.post('/update', (req, res) => {
         .catch(err => res.json({
             message: `Could not update project with id="${req.body.id}"`,
             error: err
-        }));
+        }))
+        .then((a) => {
+            Queries.logAction({
+                email: req.session.googleUser.email,
+                action: 'update',
+                log: `Resource ${req.body.id} (${JSON.stringify(req.body)})`
+            })
+        });
 });
 
 

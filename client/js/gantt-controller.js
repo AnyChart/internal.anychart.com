@@ -1,6 +1,7 @@
 class GanttController extends EventTarget {
     constructor() {
         super();
+        this.currentUserData = {};
         this.selectedItem = null;
         this._lastUsedFilterFunction = undefined;
         this._filterByUserRepaintNeeded = true;
@@ -14,6 +15,7 @@ class GanttController extends EventTarget {
         // console.log(this._lastUsedFilterFunction)
         this.preprocessData(this._lastUsedFilterFunction);
         this.chart.data(this.tree);
+        this.chart.getTimeline().lineMarker(0).value('current').stroke('3 green');
         this.chart.fitAll();
     }
 
@@ -104,7 +106,9 @@ class GanttController extends EventTarget {
         this.createUsersFilter();
     }
 
-    init(data, container = 'chart_container') {
+    init(data, currentUserData, container = 'chart_container') {
+        // console.log(data)
+        this.currentUserData = currentUserData;
         return new Promise((resolve, reject) => {
             anychart.format.outputTimezone((new Date).getTimezoneOffset());
 
@@ -123,18 +127,23 @@ class GanttController extends EventTarget {
             this.toolbar = anychart.ui.ganttToolbar();
             this.toolbar.container('toolbar_container');
             this.toolbar.target(this.chart);
+            this.toolbar.buttonsMode('icon');
 
             const dataGrid = this.chart.dataGrid();
             dataGrid.edit(true);
             dataGrid.onEditStart(() => null); //prevents rows editing.
 
             const indexColumn = dataGrid.column(0);
-            const rowIndexTemplate = '<span class="ac ac-trash-o" style="color: {color}; cursor: pointer" onclick="removeTask({id}, \'{name}\')"></span>&nbsp;{index}';
+            const userRowIndexTemplate = '{index}';
+            const adminRowIndexTemplate = '<span class="ac ac-trash-o" style="color: {color}; cursor: pointer" onclick="removeTask({id}, \'{name}\')"></span>&nbsp;{index}';
             indexColumn.labels()
                 .useHtml(true)
                 .width(35)
                 .format(function () {
                     const item = this.item;
+                    const templateString =
+                        currentUserData.isAdmin
+                        ? adminRowIndexTemplate : userRowIndexTemplate;
                     let params = {
                         color: 'red',
                         id: this.item.get('id'),
@@ -144,7 +153,8 @@ class GanttController extends EventTarget {
                         params.color = 'gray';
                         params.id = 'x';
                     }
-                    return rowIndexTemplate
+
+                    return templateString
                         .replace('{index}', String(this.linearIndex))
                         .replace('{color}', params.color)
                         .replace('{id}', params.id)
@@ -227,6 +237,7 @@ class GanttController extends EventTarget {
 
             this.chart.xScale().minimumGap(0.2).maximumGap(0.2);
             const timeline = this.chart.getTimeline();
+
             timeline.lineMarker(0).value('current').stroke('3 green');
 
             const ths = this;
@@ -235,6 +246,16 @@ class GanttController extends EventTarget {
             });
             //TODO maybe add more complex formatter.
             timeline.tooltip().format('Actual: {%start}{dateTimeFormat:dd MMM} - {%end}{dateTimeFormat:dd MMM}\nPlanned: {%baselineStart}{dateTimeFormat:dd MMM} - {%baselineEnd}{dateTimeFormat:dd MMM}\nProgress: {%progress}');
+
+            timeline.tasks()
+                .labels({
+                    position: 'left-center',
+                    anchor: 'right-center',
+                    format: '{%ticketStatus}'
+                }).progress().labels({
+                    background: "white 0.4"
+                });
+            timeline.groupingTasks().progress().fill('#96e0ca');
 
             this.initChartListeners();
 
@@ -292,6 +313,7 @@ class GanttController extends EventTarget {
                 this.selectedItem = e.item;
                 const ev = new Event('itemSelect');
                 ev.item = e.item;
+                ev.currentUser = this.currentUserData;
                 this.dispatchEvent(ev);
             } else {
                 this.selectedItem = null;
@@ -309,13 +331,34 @@ class GanttController extends EventTarget {
     }
 
     createAddonsOnToolbar() {
-        const toolbar = $('.anychart-toolbar')
+        const toolbar = $('.anychart-toolbar');
+
+        if (this.currentUserData.isAdmin){
+            const addTaskBtn = $('<div id="add_task_button"></div>');
+            addTaskBtn
+                .addClass('float-right btn btn-sm btn-success')
+                .css('padding', '1px 5px')
+                .css('margin', '1px 5px')
+                .text('Add Task')
+                .on('click', addTask);
+            toolbar.append(addTaskBtn);
+        }
+        const viewResourceChartLink = $('<div></div>');
+        viewResourceChartLink
+            .addClass('float-right btn btn-sm btn-primary')
+            .css('padding', '1px 5px')
+            .css('margin', '1px 5px')
+            .text('View Resource Chart')
+            .on('click', viewResource);
+
+        toolbar.append(viewResourceChartLink);
+
         const updateDataBtn = $('<div></div>');
 
         updateDataBtn
             .addClass('float-right btn btn-sm btn-warning')
-            .css('padding', '1px 10px')
-            .css('margin', '1px 10px')
+            .css('padding', '1px 5px')
+            .css('margin', '1px 5px')
 
         updateDataBtn
             .append('<i class="ac ac-refresh"></i>')
@@ -330,8 +373,8 @@ class GanttController extends EventTarget {
 
         toggleCompletedBtn
             .addClass('float-right btn btn-sm btn-info')
-            .css('padding', '1px 10px')
-            .css('margin', '1px 10px');
+            .css('padding', '1px 5px')
+            .css('margin', '1px 5px');
 
         toggleCompletedBtn
             .append('<i class="ac ac-clipboard"></i>')

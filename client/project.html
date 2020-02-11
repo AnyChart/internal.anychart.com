@@ -110,6 +110,14 @@
         .filter-user.active img {
             border: 16px solid blue;
         }
+
+        .filter-user:disabled img {
+            border: 16px solid rgba(20,20,20,0.02);
+        }
+
+        .anychart-toolbar-item-icon {
+            line-height: 1.1;
+        }
     </style>
 
 
@@ -120,12 +128,9 @@
         <a class="navbar-brand" href="/"><img class="navbar-brand" src="/images/ac.png" width="30px" /> <span
                 class="ac ac-chevron-left"></span> {{ projectName }}</a>
         <div class="btn-group">
-            <a class="nav-link" href="#" onclick="viewResource()">View Resource Chart</a>
-            <button class="btn btn-outline-success" type="button" onclick="addTask()" id="add_task_button">Add
-                Task</button>
+            <div class="container-fluid" id="filter-by-user"></div>           
         </div>
     </nav>
-    <div class="container-fluid" id="filter-by-user"></div>
     <div class="container-fluid" id="toolbar_container"></div>
     <div class="container-fluid" style="height: calc(100% - 100px)">
         <div class="row">
@@ -238,7 +243,7 @@
                                 <label for="task_progress" id="progress_label">Progress: 0%</label>
                             </div>
                         </div>
-                        <button class="btn btn-outline-success ml-auto mr-1" onclick="commitTask()">Apply</button>
+                        <button class="btn btn-outline-success ml-auto mr-1" onclick="commitTask()" id="apply-btn">Apply</button>
                         <button class="btn btn-outline-secondary ml-auto mr-1" onclick="closeTask()">Close</button>
                     </div>
                 </div>

@@ -1,0 +1,18 @@
+{
+    "web": {
+        "client_id": "1047237213420-1dqni5iksibis7ktafc4nv5s0tpcs206.apps.googleusercontent.com",
+        "project_id": "scheduler-utils",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "XL_yKvqrZVDCYNabXkN34ifJ",
+        "redirect_uris": [
+            "https://internal.anychart.com/oauth2",
+            "http://dev.internal.com/oauth2"
+        ],
+        "javascript_origins": [
+            "https://internal.anychart.com",
+            "http://dev.internal.com"
+        ]
+    }
+}

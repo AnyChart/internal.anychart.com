@@ -1,0 +1,64 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="shortcut icon" type="image/png" href="/anychart.png"/>
+
+    <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
+    <link href="/css/external/anychart-ui.min.css" type="text/css" rel="stylesheet">
+    <link href="/css/external/bootstrap.min.css" type="text/css" rel="stylesheet" >
+
+    <script src="/js/external/jquery-3.4.0.min.js"></script>
+    <script src="/js/external/popper.min.js"></script>
+    <script src="/js/external/bootstrap.min.js"> </script>
+
+    <script src="/js/ListStorage.js"></script>
+
+    <style>
+        html,
+        body,
+        #chart_container {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .user-image {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-faded">
+        <a class="navbar-brand" href="/"><img class="navbar-brand" src="/images/ac.png" width="30px" /> <span
+                class="ac ac-chevron-left"></span> Logs </a>
+    </nav>
+
+    <div class="my-3 p-3 bg-white rounded shadow-sm">
+        <table id="logs" class="table"></table>
+    </div>
+
+    <script>
+        $.ajax({
+            url: '/logs-data',
+            success: (data)=>{
+                console.log(data)
+                // data = JSON.parse(data);
+                data.forEach((item,i)=>{
+                    let row = $('<tr>');
+                    row.append(`<td>${item.date}<br/>${item.email}</td>`);
+                    row.append(`<td>${item.log}</td>`);
+                    $('#logs').append(row);
+                });
+            }
+        })
+    </script>
+</body>
+
+</html>

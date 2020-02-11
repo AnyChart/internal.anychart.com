@@ -6,17 +6,14 @@ const storage = new ListStorage();
 const projectsContainer = $('#current_projects');
 
 function addProject(project) {
-    return $(`<div class="media text-muted pt-3" id="project-info-${project.id}">
-                        <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-                            <div class="d-flex justify-content-between align-items-center w-100">
-                                <strong class="text-gray-dark">
-                                    <a href="/projects/${project.id}" id="ac-project-${project.id}">${project.name}</a> (<a id="ac-edit-project-${project.id}" href="#" data-toggle="modal" data-target="#newProject" data-action="${project.id}">Edit</a>)
-                                </strong>
-                                <a href="#" data-id="${project.id}" onclick="remove(this)">Remove</a>
-                            </div>
-                            <span class="d-block">${anychart.format.dateTime(project.last_modified)}</span>
-                        </div>
-                    </div>`);
+    return $(`<div class="card" style="width: 16rem; float: left; margin:10px" id="project-info-${project.id}">
+                <div class="card-body">
+                    <h5>${project.name}</h5>
+                    <a class="btn btn-success" href="/projects/${project.id}" id="ac-project-${project.id}">Choose</a>
+                    <a class="btn btn-primary manager-controls" href="#" id="ac-edit-project-${project.id}"  data-toggle="modal" data-target="#newProject" data-action="${project.id}">Edit</a>
+                    <!-- a href="#" data-id="${project.id}" onclick="remove(this)">Remove</a -->
+                </div>
+            </div>`);
 }
 
 function remove(target) {
@@ -72,6 +69,17 @@ anychart.onDocumentReady(() => {
             }
             preloader.visible(false);
             $('#newProject').modal('hide');
+        })
+        .then((res, req)=>{
+            fetch('/curr-user')
+            .then(resp=>resp.json())
+            .then(user=>{
+                if ((!user.isAdmin)) $('.manager-controls').remove();
+                $('#user-profile > img')
+                    .attr('src', user.picture)
+                    .attr('alt', user.name)
+                    .attr('title', user.name);
+            })
         });
 });
 

@@ -1,17 +1,12 @@
-const preloader = anychart.ui.preloader();
-preloader.render();
-preloader.visible(true);
-
 const storage = new ListStorage();
 const usersContainer = $('#users');
 
-anychart.onDocumentReady(() => {
+$(() => {
     initModalListeners();
 
     fetch(`/users/data`)
     .then(resp => resp.json())
     .then(users => {
-        preloader.visible(false);
         if (users.length) {
             usersContainer.html('');
             users.forEach(user => {
@@ -23,24 +18,19 @@ anychart.onDocumentReady(() => {
         }
     })
     .catch(err => {
-        preloader.visible(false);
         console.error(err);
     });
 });
 
 function addUser(user) {
-    return $(`<div class="media text-muted pt-3" id="user-info-${user.id}">
-                <img class="mr-3 user-image" id="ac-user-ava-${user.id}" src="${user.avatar}" alt="Ava for ${user.name}">
-                    <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <strong class="text-gray-dark">
-                                <span id="ac-user-${user.id}">${user.name}</span> (<a id="ac-edit-user-${user.id}" href="#" data-toggle="modal" data-target="#newUser" data-action="${user.id}"">Edit</a>)
-                            </strong>
-                            <a href="#" data-id="${user.id}" onclick="remove(this)">Remove</a>
-                        </div>
-                        <span class="d-block">${anychart.format.dateTime(user.last_modified)}</span>
-                    </div>
-                </div>`);
+    return $(`<div class="card" style="width: 10rem; float: left; margin:10px" id="user-info-${user.id}">
+            <img class="card-img-top rounded" id="ac-user-ava-${user.id}" src="${user.avatar}" alt="Ava for ${user.name}">
+            <div class="card-body">
+                <h5>${user.name}</h5>
+                <a class="btn btn-primary manager-controls" href="#" id="ac-edit-user-${user.id}"  data-toggle="modal" data-target="#newUser" data-action="${user.id}">Edit</a>
+                <!-- a href="#" data-id="${user.id}" onclick="remove(this)">Remove</a -->
+            </div>
+        </div>`);
 }
 
 function remove(target) {
@@ -48,7 +38,6 @@ function remove(target) {
     const name = storage.get(id, 'name');
 
     if (confirm(`Do you want to remove user "${name}"?`)) {
-        preloader.visible(true);
         storage.set(id, 'deleted', 1);
         $.post(
             '/users/update',
@@ -60,8 +49,6 @@ function remove(target) {
                     storage.del(id);
                     $(`#user-info-${id}`).remove();
                 }
-
-                preloader.visible(false);
             }
         );
     }
@@ -92,8 +79,6 @@ function createUser() {
     const newUserAva = $('#ava_url').val();
 
     if (newUserName) {
-        preloader.visible(true);
-
         if (action == 'new') {
             $.post(
                 '/users/add',
@@ -108,8 +93,6 @@ function createUser() {
                     } else {
                         usersContainer.prepend(addUser(res));
                     }
-    
-                    preloader.visible(false);
                     $('#newUser').modal('hide');
                 }
             );
