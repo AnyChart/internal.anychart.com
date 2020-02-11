@@ -61,6 +61,14 @@ CREATE TABLE `task` (
   `url` varchar(1024) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+CREATE TABLE `log_action` (
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `email` varchar(50) NOT NULL,
+  `action` varchar(10) NOT NULL,
+  `log` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 --
 -- Table structure for table `user`
 --
