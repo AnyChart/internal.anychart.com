@@ -7,11 +7,11 @@
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
         "client_secret": "XL_yKvqrZVDCYNabXkN34ifJ",
         "redirect_uris": [
-            "https://internal.anychart.com/oauth2",
+            "http://internal.anychart.com/oauth2",
             "http://dev.internal.com/oauth2"
         ],
         "javascript_origins": [
-            "https://internal.anychart.com",
+            "http://internal.anychart.com",
             "http://dev.internal.com"
         ]
     }
