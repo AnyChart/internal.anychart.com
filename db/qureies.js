@@ -1,9 +1,9 @@
-const connect = require(__dirname+'/connect');
+const connect = require(__dirname + '/connect');
 const NULL = 'NULL';
 
 //TODO добавить логгирование каждого запроса
 
-class Queries { }
+class Queries {}
 
 // ------- Common.
 /**
@@ -11,13 +11,16 @@ class Queries { }
  * @param {string} query - Query string.
  * @returns {Promise}
  */
-Queries.query = (query) => {
+Queries.query = (query, returnId) => {
     return connect()
         .then(pc => new Promise((resolve, reject) => {
             // console.log(query); //TODO debuging queries.
             pc.pool.query(query, (err, result, fields) => {
                 pc.connection.release();
-                err ? reject(err) : resolve(result);
+                if (returnId) resolve(result.insertId);
+                else {
+                    err ? reject(err) : resolve(result);
+                }
             });
         }))
         .catch(err => Promise.reject(err));
@@ -155,7 +158,7 @@ Queries.filterNulls_ = (tasks) => {
         for (let key in task) {
             if (task[key] == null)
                 delete task[key];
-        }            
+        }
     });
     return Promise.resolve(tasks);
 }
@@ -184,7 +187,7 @@ Queries.getTasksByProjectId = (projectId) => {
     const notAssignedTasksQuery = Queries.query(
         `SELECT * FROM task WHERE task.project=${projectId} AND task.assignee IS NULL AND task.deleted=0`
     );
-                                
+
     return Promise
         .all([assignedTasksQuery, notAssignedTasksQuery])
         .then(values => Promise.resolve([].concat(...values))); //Combines two result arrays to a single one.
@@ -221,10 +224,24 @@ Queries.getLastModifiedTask_ = (date) => {
         .then(data => data.length ? Promise.resolve(data) : Queries.query(notAssignedTasksQuery));
 }
 
+
 /**
- * Gets project by id.
+ * Get assigned task by Id.
+ * @param {number} id - Task id
+ * @returns {Promise}
+ */
+Queries.getAssignedTaskById = (id) => {
+    const taskQuery = `SELECT task.*, user.id AS userId, user.name AS userName, user.avatar AS userAvatar, 
+                   user.deleted AS userDeleted
+                   FROM task, user 
+                   WHERE task.id=${id} LIMIT 1`;
+    return Queries.query(taskQuery);
+}
+
+/**
+ * Gets task by id.
  * TODO TBA remaining fields.
- * @param {number} id - Project id.
+ * @param {number} id - Task id.
  * @returns {Promise}
  */
 Queries.getTasksById = (id) => {
@@ -260,7 +277,7 @@ Queries.updateTask = (data) => {
         SET name="${data.name}", parent=${data.parent || NULL}, url="${data.url}", priority="${data.priority}", assignee=${data.assignee || NULL}, actualStart=${data.actualStart || NULL}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progressValue || NULL}, last_modified=${now}, deleted=${data.deleted} WHERE id=${data.id}`;
     return Queries
         .query(query)
-        .then(() => Queries.getLastModifiedTask_(now))
+        .then(() => Queries.getAssignedTaskById(data.id))
         .catch(err => Promise.reject(err));
 }
 

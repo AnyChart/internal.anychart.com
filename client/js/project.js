@@ -33,7 +33,11 @@ controller.addEventListener('itemSelect', (e) => {
         e.currentUser.name.includes(item.get('userName'))
        ){
         $('#apply-btn').show();
-    }else $('#apply-btn').hide();
+        $('.editable-input, #task_baselineStart, #task_baselineEnd').prop('disabled',false);
+    }else {
+        $('#apply-btn').hide();
+        $('.editable-input, #task_baselineStart, #task_baselineEnd').prop('disabled',true);
+    }
 
     $('#task_name').focus();
 });

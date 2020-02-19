@@ -57,8 +57,12 @@ router.get('/roots', (req, res) => {
  * Creates new task.
  */
 router.post('/add', (req, res) => {
+    let newTaskData = {};
     Queries.createTask(req.body)
-        .then(newTasks => res.json(newTasks))
+        .then(newTasks => {
+            newTaskData = newTasks[0];
+            res.json(newTasks);
+        })
         .catch(err => res.json({
             message: `Could not create task \"${req.body.name}\"`,
             error: err
@@ -67,27 +71,73 @@ router.post('/add', (req, res) => {
             Queries.logAction({
                 email: req.session.googleUser.email,
                 action: 'Add',
-                log: `Task ${req.body.id} (${JSON.stringify(req.body)})`
+                log: `Task ${newTaskData.id} (${JSON.stringify(newTaskData)})`
             })
         });
 });
 
 /**
+ * Helper function.
+ * @param {*} obj1 
+ * @param {*} obj2 
+ */
+function getTasksDiff(obj1, obj2) {
+    const result = {};
+    if (Object.is(obj1, obj2)) {
+        return undefined;
+    }
+    if (!obj2 || typeof obj2 !== 'object') {
+        return obj2;
+    }
+    Object.keys(obj1 || {}).concat(Object.keys(obj2 || {})).forEach(key => {
+        if (key == 'last_modified') return;
+
+        if (obj2[key] !== obj1[key] && !Object.is(obj1[key], obj2[key])) {
+            if (["actualEnd","actualStart","baselineStart","baselineEnd"].includes(key)){
+                result[key] = (new Date(obj2[key])).toDateString();
+            }else{
+                result[key] = obj2[key];
+            }
+        }
+        if (typeof obj2[key] === 'object' && typeof obj1[key] === 'object') {
+            if (obj1[key] || obj2[key]) {
+                const value = getTasksDiff(obj1[key], obj2[key]);
+                if (value !== undefined) {
+                    result[key] = value;
+                }
+            }
+        }
+    });
+    return result;
+}
+
+/**
  * Updates task info.
  */
 router.post('/update', (req, res) => {
-    Queries.updateTask(req.body)
-        .then(newTasks => res.json(newTasks))
-        .catch(err => res.json({
-            message: `Could not update task \"${req.body.name}\"`,
-            error: err
-        }))
-        .then((a) => {
-            Queries.logAction({
-                email: req.session.googleUser.email,
-                action: 'update',
-                log: `Task ${req.body.id} (${JSON.stringify(req.body)})`
-            })
+    Queries
+        .getAssignedTaskById(req.body.id)
+        .then(taskData => {
+            const oldTaskData = taskData[0];
+            let newTaskData = {};
+            return Queries
+                .updateTask(req.body)
+                .then(newTasks => {
+                    newTaskData = newTasks[0];
+                    res.json(newTasks);
+                })
+                .catch(err => res.json({
+                    message: `Could not update task \"${req.body.name}\"`,
+                    error: err
+                }))
+                .then(() => {
+                    const taskDiff = getTasksDiff(oldTaskData, newTaskData);
+                    Queries.logAction({
+                        email: req.session.googleUser.email,
+                        action: 'update',
+                        log: `Task ${req.body.id} (${JSON.stringify(taskDiff)})`
+                    })
+                });
         });
 });
 

@@ -22,12 +22,17 @@ class GanttController extends EventTarget {
     createUsersFilter() {
         if (this._filterByUserRepaintNeeded && usersStorage && usersStorage.storage[1]) {
             const filterPane = $('#filter-by-user');
-            filterPane.html('');
-            filterPane.append(
-                $('<button class="btn celar-filter-user">')
-                .append($('<i class="ac ac-group" style="font-size:30"></i>'))
-                .append($('<br/><span>Все</span>'))
-            );
+            filterPane
+                .html('')
+                .append(
+                    $('<button class="btn celar-filter-clear">')
+                    .append($('<i class="ac ac-diagonal-cros" style="font-size:30"></i>'))
+                    .append($('<br/><span>Clear</span>')))
+                .append(
+                    $('<button class="btn filter-user" data-rel="">')
+                    .append($('<i class="ac ac-group" style="font-size:30"></i>'))
+                    .append($('<br/><span>Unassigned</span>'))
+                );
 
             Object
                 .values(usersStorage.storage)
@@ -60,7 +65,7 @@ class GanttController extends EventTarget {
                 this.filterDataBySelectedUsers();
             });
 
-            $('.celar-filter-user').on('click', () => {
+            $('.celar-filter-clear').on('click', () => {
                 filterUserElements.removeClass('active');
                 this.filterDataBySelectedUsers();
             })
