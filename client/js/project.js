@@ -28,15 +28,19 @@ controller.addEventListener('itemSelect', (e) => {
         $('#child-props').hide();
     } else $('#child-props').show();
 
+    if (e.currentUser.isAdmin){
+        $('.editable-input, #task_baselineStart, #task_baselineEnd').prop('disabled',false);
+    }else{
+        $('.editable-input, #task_baselineStart, #task_baselineEnd').prop('disabled',true);
+    }
+
     if (
         e.currentUser.isAdmin ||
         e.currentUser.name.includes(item.get('userName'))
        ){
-        $('#apply-btn').show();
-        $('.editable-input, #task_baselineStart, #task_baselineEnd').prop('disabled',false);
+        $('#apply-btn').show();        
     }else {
-        $('#apply-btn').hide();
-        $('.editable-input, #task_baselineStart, #task_baselineEnd').prop('disabled',true);
+        $('#apply-btn').hide();        
     }
 
     $('#task_name').focus();
