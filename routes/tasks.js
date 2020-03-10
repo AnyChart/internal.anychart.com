@@ -37,7 +37,7 @@ router.get('/p/:projectId', (req, res) => {
             });
             return Promise.all(jiraStatus)
         })
-        .then(data => res.json(data[0]))
+        .then(data => res.json(data[0] || []))
         .catch(err => res.json({
             message: `Could not get tasks for project with id=${projectId}`,
             error: err

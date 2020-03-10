@@ -61,9 +61,12 @@ $(() => {
         .then(currentUserData => {
             return fetch(`/tasks/p/${projectId}`)
                 .then(resp => resp.json())
+                // .catch(e=>console.log(e))
                 .then(tasks => {
                     // console.log(tasks)
-                    tasksStorage.sync(tasks);
+                    tasks = tasks || [];
+                    console.log(tasks, tasksStorage)
+                    if (tasks.lengt) tasksStorage.sync(tasks);
                     return controller.init(tasks, currentUserData);
                 })
                 .then(() => {
@@ -82,6 +85,7 @@ $(() => {
                         .then(() => preloader.visible(false));
                 })
         })
+        // .catch(e=>console.log(e))
 });
 
 function updateData() {

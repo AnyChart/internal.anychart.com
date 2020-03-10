@@ -70,9 +70,17 @@ const OAuth2Data = require('./google_key.json')
 const CLIENT_ID = OAuth2Data.web.client_id;
 const CLIENT_SECRET = OAuth2Data.web.client_secret;
 
+function normalizeHost(host){
+    if (host.includes('localhost')){
+        return "dev.internal.com";
+    }
+    return host;
+}
+
 app.get('/oauth2', (req, res)=>{
     const code = req.query.code;
-    const REDIRECT_URL = OAuth2Data.web.redirect_uris.find(item => item.includes(req.headers.host));
+    const host = normalizeHost(req.headers.host);
+    const REDIRECT_URL = OAuth2Data.web.redirect_uris.find(item => item.includes(host));
     const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL)
 
     if (code) {
