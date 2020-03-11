@@ -35,7 +35,7 @@ router.get('/p/:projectId', (req, res) => {
                     )
                 }
             });
-            return Promise.all(jiraStatus)
+            return jiraStatus.length ? Promise.all(jiraStatus) : data;
         })
         .then(data => res.json( data.length ? (Array.isArray(data[0]) ? data[0]: data) : []))
         .catch(err => res.json({
