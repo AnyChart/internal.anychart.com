@@ -64,9 +64,10 @@ $(() => {
                 // .catch(e=>console.log(e))
                 .then(tasks => {
                     // console.log(tasks)
-                    tasks = tasks || [];
-                    console.log(tasks, tasksStorage)
-                    if (tasks.lengt) tasksStorage.sync(tasks);
+                    // tasks = tasks || [];
+                    // console.log(tasks, tasksStorage)
+                    // if (tasks.lengt) 
+                    tasksStorage.sync(tasks);
                     return controller.init(tasks, currentUserData);
                 })
                 .then(() => {
