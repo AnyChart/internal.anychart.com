@@ -135,8 +135,10 @@ class GanttController extends EventTarget {
             this.toolbar.buttonsMode('icon');
 
             const dataGrid = this.chart.dataGrid();
-            dataGrid.edit(true);
-            dataGrid.onEditStart(() => null); //prevents rows editing.
+            if (this.currentUserData){
+                dataGrid.edit(true);
+                dataGrid.onEditStart(() => null); //prevents rows editing.
+            }
 
             const indexColumn = dataGrid.column(0);
             const userRowIndexTemplate = '{index}';

@@ -214,7 +214,7 @@ Queries.getResourcesByProjectId = (projectId) => {
 Queries.getLastModifiedTask_ = (date) => {
     const assignedTaskQuery = `SELECT task.*, user.id AS userId, user.name AS userName, user.avatar AS userAvatar, 
                    user.deleted AS userDeleted
-                   FROM task, user 
+                   FROM task  LEFT JOIN user ON user.id = task.assignee 
                    WHERE task.last_modified=${date} AND task.assignee=user.id LIMIT 1`;
 
     const notAssignedTasksQuery = `SELECT * FROM task WHERE last_modified=${date} LIMIT 1`;
@@ -233,7 +233,7 @@ Queries.getLastModifiedTask_ = (date) => {
 Queries.getAssignedTaskById = (id) => {
     const taskQuery = `SELECT task.*, user.id AS userId, user.name AS userName, user.avatar AS userAvatar, 
                    user.deleted AS userDeleted
-                   FROM task, user 
+                   FROM task LEFT JOIN user ON user.id = task.assignee
                    WHERE task.id=${id} LIMIT 1`;
     return Queries.query(taskQuery);
 }
