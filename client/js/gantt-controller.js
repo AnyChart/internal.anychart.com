@@ -231,7 +231,18 @@ class GanttController extends EventTarget {
                 });
             // .format('{%userName}');
 
-            const progressColumn = dataGrid.column(5);
+            const timeSpentColumn = dataGrid.column(5);
+            timeSpentColumn
+                .title('%')
+                .width(50)
+                .labelsOverrider(boldLabelsOverrider)
+                .labels()
+                .format('{%timeSpent}');
+
+            this.chart.splitterPosition(565);
+            dataGrid.fixedColumns(true);
+
+            const progressColumn = dataGrid.column(6);
             progressColumn
                 .title('%')
                 .width(40)

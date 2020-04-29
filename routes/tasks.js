@@ -20,22 +20,24 @@ router.get('/p/:projectId', (req, res) => {
     const projectId = req.params.projectId;
     Queries.getTasksByProjectId(projectId)
         .then(data => {
-            let jiraStatus = [];
+            let jiraStatusPromises = [];
             data.forEach((item, i) => {
                 if (item.url) {
-                    jiraStatus.push(
-                        jira.issue
-                        .getIssue({
+                    jiraStatusPromises.push(
+                        jira.issue.getIssue({
                             issueKey: item.url
                         })
                         .then(issue => {
+                            // console.log(issue)
                             data[i].ticketStatus = issue.fields.status.name;
+                            data[i].timeSpent = issue.fields.timetracking ? 
+                                issue.fields.timetracking.timeSpent : '0m';
                             return data;
                         })
                     )
                 }
             });
-            return jiraStatus.length ? Promise.all(jiraStatus) : data;
+            return jiraStatusPromises.length ? Promise.all(jiraStatusPromises) : data;
         })
         .then(data => res.json( data.length ? (Array.isArray(data[0]) ? data[0]: data) : []))
         .catch(err => res.json({
