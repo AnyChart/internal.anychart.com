@@ -213,7 +213,7 @@ class GanttController extends EventTarget {
                     if (name && name.match(new RegExp("[A-z]+\-[0-9]+"))) {
                         url = 'https://anychart.atlassian.net/browse/' + url;
                     }
-                    return `<a href="${url}" target="_blank">${name}</a>`;
+                    return `<a href="${url}" target="_blank">${name.slice(-10)}</a>`;
                 });
 
             const assigneeColumn = dataGrid.column(4);
