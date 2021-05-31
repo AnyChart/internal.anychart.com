@@ -21,8 +21,8 @@ router.get('/p/:projectId', (req, res) => {
     Queries.getTasksByProjectId(projectId)
         .then(data => {
             let jiraStatusPromises = [];
-            data.forEach((item, i) => {
-                if (item.url) {
+            data.forEach((item, i) => {                
+                if (item.url && item.url.length < 11) {
                     jiraStatusPromises.push(
                         jira.issue.getIssue({
                             issueKey: item.url
