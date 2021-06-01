@@ -257,6 +257,7 @@ class GanttController extends EventTarget {
             const timeline = this.chart.getTimeline();
 
             timeline.lineMarker(0).value('current').stroke('3 green');
+            timeline.weekendsFill('gray 0.2');
 
             const ths = this;
             timeline.tooltip().titleFormat(function () {

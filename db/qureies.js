@@ -91,7 +91,14 @@ Queries.createProject = (name, tasks = []) => {
  */
 Queries.updateProject = (data) => {
     const now = Date.now();
-    return Queries.query(`UPDATE project SET name="${data.name}", last_modified=${now}, deleted="${data.deleted}" WHERE id=${data.id}`)
+    return Queries.query(`
+    UPDATE project 
+    SET 
+        name="${data.name}", 
+        last_modified=${now}, 
+        deleted="${data.deleted}"
+    WHERE id=${data.id}
+    ;`)
         .then(() => Queries.getLastModifiedProject_(now))
         .then(lastModified => Queries.getProjectById(lastModified[0].id))
         .catch(err => Promise.reject(err));
@@ -140,7 +147,15 @@ Queries.createUser = (data) => {
  */
 Queries.updateUser = (data) => {
     const now = Date.now();
-    return Queries.query(`UPDATE user SET name="${data.name}", last_modified=${now}, deleted="${data.deleted}", avatar="${data.avatar || NULL}" WHERE id=${data.id}`)
+    return Queries.query(`
+    UPDATE user 
+    SET 
+        name="${data.name}", 
+        last_modified=${now}, 
+        deleted="${data.deleted}", 
+        avatar="${data.avatar || NULL}" 
+    WHERE id=${data.id}
+    ;`)
         .then(() => Queries.getLastModifiedUser_(now))
         .then(lastModified => Queries.getUserById(lastModified[0].id))
         .catch(err => Promise.reject(err));
@@ -168,7 +183,15 @@ Queries.filterNulls_ = (tasks) => {
  * @returns {Promise}
  */
 Queries.getRootTaskNames = () => {
-    return Queries.query('SELECT task.name FROM task WHERE task.parent IS NULL GROUP BY task.name ORDER BY task.name');
+    return Queries.query(`
+    SELECT 
+        task.name 
+    FROM task 
+    WHERE 
+        task.parent IS NULL 
+    GROUP BY task.name 
+    ORDER BY task.name
+    ;`);
 }
 
 
@@ -179,10 +202,22 @@ Queries.getRootTaskNames = () => {
  */
 Queries.getTasksByProjectId = (projectId) => {
     const assignedTasksQuery = Queries.query(
-        `SELECT task.*, 
-            user.id AS userId, user.name AS userName, user.avatar AS userAvatar, user.deleted AS userDeleted
-            FROM task, user
-            WHERE task.project=${projectId} AND task.assignee=user.id AND task.deleted=0`);
+    `SELECT 
+        task.*, 
+        user.id AS userId, 
+        user.name AS userName, 
+        user.avatar AS userAvatar, 
+        user.deleted AS userDeleted
+    FROM task, user
+    WHERE 
+        task.project=${projectId} 
+        AND 
+        task.assignee=user.id 
+        AND 
+        task.deleted=0
+    ORDER BY 
+        task.baselineStart ASC
+    ;`);
 
     const notAssignedTasksQuery = Queries.query(
         `SELECT * FROM task WHERE task.project=${projectId} AND task.assignee IS NULL AND task.deleted=0`
@@ -212,10 +247,22 @@ Queries.getResourcesByProjectId = (projectId) => {
  * @returns {Promise}
  */
 Queries.getLastModifiedTask_ = (date) => {
-    const assignedTaskQuery = `SELECT task.*, user.id AS userId, user.name AS userName, user.avatar AS userAvatar, 
-                   user.deleted AS userDeleted
-                   FROM task  LEFT JOIN user ON user.id = task.assignee 
-                   WHERE task.last_modified=${date} AND task.assignee=user.id LIMIT 1`;
+    const assignedTaskQuery = `
+    SELECT 
+        task.*, 
+        user.id AS userId, 
+        user.name AS userName, 
+        user.avatar AS userAvatar, 
+        user.deleted AS userDeleted
+    FROM 
+        task LEFT JOIN 
+        user ON user.id = task.assignee 
+    WHERE 
+        task.last_modified=${date} 
+        AND 
+        task.assignee=user.id 
+    LIMIT 1
+    ;`;
 
     const notAssignedTasksQuery = `SELECT * FROM task WHERE last_modified=${date} LIMIT 1`;
 
@@ -231,10 +278,19 @@ Queries.getLastModifiedTask_ = (date) => {
  * @returns {Promise}
  */
 Queries.getAssignedTaskById = (id) => {
-    const taskQuery = `SELECT task.*, user.id AS userId, user.name AS userName, user.avatar AS userAvatar, 
-                   user.deleted AS userDeleted
-                   FROM task LEFT JOIN user ON user.id = task.assignee
-                   WHERE task.id=${id} LIMIT 1`;
+    const taskQuery = `
+    SELECT 
+        task.*, 
+        user.id AS userId, 
+        user.name AS userName, 
+        user.avatar AS userAvatar, 
+        user.deleted AS userDeleted
+    FROM 
+        task LEFT JOIN 
+        user ON user.id = task.assignee
+    WHERE task.id=${id} 
+    LIMIT 1
+    ;`;
     return Queries.query(taskQuery);
 }
 
@@ -250,7 +306,14 @@ Queries.getTasksById = (id) => {
 }
 
 Queries.resetParent_ = (id) => {
-    return Queries.query(`UPDATE task SET actualStart=NULL, actualEnd=NULL, progressValue=NULL WHERE id=${id}`);
+    return Queries.query(`
+    UPDATE task 
+    SET 
+        actualStart=NULL, 
+        actualEnd=NULL, 
+        progressValue=NULL 
+    WHERE id=${id}
+    ;`);
 }
 
 Queries.resetParents_ = (parents = '[]') => {
@@ -273,8 +336,22 @@ Queries.createTask = (data) => {
 
 Queries.updateTask = (data) => {
     const now = Date.now();
-    const query = `UPDATE task
-        SET name="${data.name}", parent=${data.parent || NULL}, url="${data.url}", priority="${data.priority}", assignee=${data.assignee || NULL}, actualStart=${data.actualStart || NULL}, actualEnd=${data.actualEnd || NULL}, baselineStart=${data.baselineStart || NULL}, baselineEnd=${data.baselineEnd || NULL}, progressValue=${+data.progressValue || NULL}, last_modified=${now}, deleted=${data.deleted} WHERE id=${data.id}`;
+    const query = `
+    UPDATE task
+    SET 
+        name="${data.name}", 
+        parent=${data.parent || NULL}, 
+        url="${data.url}", 
+        priority="${data.priority}", 
+        assignee=${data.assignee || NULL}, 
+        actualStart=${data.actualStart || NULL}, 
+        actualEnd=${data.actualEnd || NULL}, 
+        baselineStart=${data.baselineStart || NULL}, 
+        baselineEnd=${data.baselineEnd || NULL}, 
+        progressValue=${+data.progressValue || NULL}, 
+        last_modified=${now}, deleted=${data.deleted} 
+    WHERE id=${data.id}
+    ;`;
     return Queries
         .query(query)
         .then(() => Queries.getAssignedTaskById(data.id))
