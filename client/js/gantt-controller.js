@@ -258,6 +258,20 @@ class GanttController extends EventTarget {
 
             timeline.lineMarker(0).value('current').stroke('3 green');
             timeline.weekendsFill('red 0.1');
+             // get timeline calendar
+            var calendar = timeline.scale().calendar();
+
+            // set working hours  and holidays
+            calendar
+                .schedule([
+                null,
+                { from: 10, to: 18 },
+                { from: 10, to: 18 },
+                { from: 10, to: 18 },
+                { from: 10, to: 18 },
+                { from: 10, to: 18 },
+                null
+                ]);
 
             const ths = this;
             timeline.tooltip().titleFormat(function () {
